@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <link rel="manifest" href="manifest.json">
     <title>Invoice · Australia</title>
-    <!-- jsPDF & html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
@@ -422,7 +421,8 @@
         }
 
         /* ================================================================
-           INVOICE PREVIEW – FIXED TABLE USING DIV GRID (no HTML table)
+           INVOICE PREVIEW – FLEXBOX TABLE (NO display:table)
+           This is the most reliable approach for html2canvas
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -484,26 +484,19 @@
             color: #1a202c;
         }
 
-        /* === GRID TABLE (replaces HTML table) === */
+        /* === FLEXBOX TABLE === */
         #invoicePreview .inv-table {
             width: 100%;
             margin: 10px 0 16px;
             border-collapse: collapse;
             font-size: 13px;
-            display: table;
         }
         #invoicePreview .inv-table .row {
-            display: table-row;
-        }
-        #invoicePreview .inv-table .cell {
-            display: table-cell;
-            padding: 10px 8px;
+            display: flex;
+            width: 100%;
             border-bottom: 1px solid #edf2f7;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            vertical-align: top;
         }
-        #invoicePreview .inv-table .header .cell {
+        #invoicePreview .inv-table .row.header {
             background: #edf2f7;
             font-weight: 600;
             font-size: 12px;
@@ -512,24 +505,32 @@
             color: #2d3748;
             border-bottom: 2px solid #e2e8f0;
         }
-        /* Fixed column widths (in pixels) so html2canvas respects them */
+        #invoicePreview .inv-table .cell {
+            padding: 10px 8px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            vertical-align: top;
+            flex-shrink: 0;
+        }
+        /* Fixed column widths */
         #invoicePreview .inv-table .col-desc {
-            width: 200px;
-            min-width: 180px;
+            flex: 0 0 40%;
+            width: 40%;
+            text-align: left;
         }
         #invoicePreview .inv-table .col-qty {
-            width: 70px;
-            min-width: 60px;
+            flex: 0 0 20%;
+            width: 20%;
             text-align: right;
         }
         #invoicePreview .inv-table .col-rate {
-            width: 80px;
-            min-width: 70px;
+            flex: 0 0 20%;
+            width: 20%;
             text-align: right;
         }
         #invoicePreview .inv-table .col-amount {
-            width: 90px;
-            min-width: 80px;
+            flex: 0 0 20%;
+            width: 20%;
             text-align: right;
         }
 
@@ -1384,7 +1385,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW – FIXED: uses div-based grid table
+        // RENDER PREVIEW – FLEXBOX VERSION (NO display:table)
         // ============================================================
         function renderPreview(data) {
             const container = document.getElementById('invoicePreview');
@@ -1395,7 +1396,7 @@
 
             const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
 
-            // Build rows as divs (not table rows)
+            // Build rows as flex rows
             let rowsHtml = '';
             items.forEach(i => {
                 let dateRange = '';
@@ -1415,7 +1416,6 @@
                     `;
             });
 
-            // Build the whole invoice with a div grid
             container.innerHTML = `
                     <div class="inv-header">
                         <div>
@@ -1441,7 +1441,7 @@
                         ${client.email || ''}
                     </div>
 
-                    <!-- GRID TABLE (div-based, not HTML table) -->
+                    <!-- FLEXBOX TABLE -->
                     <div class="inv-table">
                         <div class="row header">
                             <div class="cell col-desc">Description</div>
@@ -1491,7 +1491,7 @@
             const originalBg = previewElement.style.background;
             previewElement.style.background = '#ffffff';
             previewElement.style.padding = '28px 24px';
-            previewElement.style.width = '600px'; // fixed width for consistency
+            previewElement.style.width = '600px';
             previewElement.style.maxWidth = '100%';
 
             return html2canvas(previewElement, {
@@ -1672,7 +1672,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE / EDIT / DUPLICATE (unchanged)
+        // SAVE / EDIT / DUPLICATE
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const preview = document.getElementById('invoicePreview');
@@ -1752,7 +1752,7 @@
         });
 
         // ============================================================
-        // HISTORY (unchanged, included for completeness)
+        // HISTORY
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
@@ -2057,8 +2057,8 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App ready – fixed table using div grid!');
-        console.log('✅ PDF should now have properly aligned columns.');
+        console.log('🧾 Invoice App ready – FLEXBOX table!');
+        console.log('✅ PDF should now have perfectly aligned columns.');
     </script>
 </body>
 </html>
