@@ -421,8 +421,8 @@
         }
 
         /* ================================================================
-           INVOICE PREVIEW – FLEXBOX TABLE (NO display:table)
-           This is the most reliable approach for html2canvas
+           INVOICE PREVIEW – HTML TABLE WITH FIXED PIXEL WIDTHS
+           This is the most reliable approach across all browsers
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -484,53 +484,57 @@
             color: #1a202c;
         }
 
-        /* === FLEXBOX TABLE === */
-        #invoicePreview .inv-table {
+        /* === HTML TABLE with fixed pixel widths === */
+        #invoicePreview table {
             width: 100%;
-            margin: 10px 0 16px;
+            max-width: 100%;
             border-collapse: collapse;
+            margin: 10px 0 16px;
             font-size: 13px;
+            table-layout: fixed;
         }
-        #invoicePreview .inv-table .row {
-            display: flex;
-            width: 100%;
-            border-bottom: 1px solid #edf2f7;
-        }
-        #invoicePreview .inv-table .row.header {
+        #invoicePreview th {
             background: #edf2f7;
             font-weight: 600;
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.4px;
             color: #2d3748;
+            padding: 10px 8px;
+            text-align: left;
             border-bottom: 2px solid #e2e8f0;
         }
-        #invoicePreview .inv-table .cell {
+        #invoicePreview td {
             padding: 10px 8px;
+            border-bottom: 1px solid #edf2f7;
+            color: #1a202c;
             word-wrap: break-word;
             overflow-wrap: break-word;
             vertical-align: top;
-            flex-shrink: 0;
         }
-        /* Fixed column widths */
-        #invoicePreview .inv-table .col-desc {
-            flex: 0 0 40%;
-            width: 40%;
+        /* Fixed column widths (in pixels) – reliable across all browsers */
+        #invoicePreview .col-desc {
+            width: 220px;
+            max-width: 220px;
+            min-width: 180px;
             text-align: left;
         }
-        #invoicePreview .inv-table .col-qty {
-            flex: 0 0 20%;
-            width: 20%;
+        #invoicePreview .col-qty {
+            width: 80px;
+            max-width: 80px;
+            min-width: 60px;
             text-align: right;
         }
-        #invoicePreview .inv-table .col-rate {
-            flex: 0 0 20%;
-            width: 20%;
+        #invoicePreview .col-rate {
+            width: 90px;
+            max-width: 90px;
+            min-width: 70px;
             text-align: right;
         }
-        #invoicePreview .inv-table .col-amount {
-            flex: 0 0 20%;
-            width: 20%;
+        #invoicePreview .col-amount {
+            width: 100px;
+            max-width: 100px;
+            min-width: 80px;
             text-align: right;
         }
 
@@ -864,6 +868,34 @@
         let appData = loadData();
 
         // ============================================================
+        // SEED DEMO DATA (if no data exists)
+        // ============================================================
+        function seedDemoData() {
+            if (appData.businesses.length === 0 && appData.clients.length === 0) {
+                appData.businesses.push({
+                    id: 'biz_demo',
+                    name: 'My Business Pty Ltd',
+                    abn: '12345678901',
+                    address: '123 George St, Sydney NSW 2000',
+                    phone: '0400 000 000',
+                    email: 'info@mybusiness.com.au',
+                    bsb: '062233',
+                    account: '10314687'
+                });
+                appData.clients.push({
+                    id: 'client_demo',
+                    name: 'Azure',
+                    abn: '12271867198',
+                    address: 'Hahaha, hzhhah',
+                    email: 'azure@example.com',
+                    nextInvoiceNumber: 5
+                });
+                saveData(appData);
+            }
+        }
+        seedDemoData();
+
+        // ============================================================
         // HELPERS
         // ============================================================
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -1034,7 +1066,7 @@
                             <strong>${b.name}</strong>
                             <span class="badge">ABN ${formatABN(b.abn)}</span>
                             <div style="font-size:12px;color:var(--text-muted);">${b.address || 'No address'}</div>
-                            ${b.bsb || b.account ? `<div style="font-size:12px;color:var(--text-muted);">BSB: ${b.bsb || ''} Acc: ${b.account || ''}</div>` : ''}
+                            ${b.bsb || b.account ? `<div style="font-size:12px;color:var(--text-muted);">BSB: ${b.bsb ? formatBSB(b.bsb) : ''} Acc: ${b.account || ''}</div>` : ''}
                         </div>
                         <div>
                             <button class="btn btn-secondary btn-sm edit-biz" data-id="${b.id}">✎</button>
@@ -1090,7 +1122,7 @@
             document.getElementById('bizAddress').value = b.address || '';
             document.getElementById('bizPhone').value = b.phone || '';
             document.getElementById('bizEmail').value = b.email || '';
-            document.getElementById('bizBsb').value = b.bsb || '';
+            document.getElementById('bizBsb').value = b.bsb ? formatBSB(b.bsb) : '';
             document.getElementById('bizAccount').value = b.account || '';
             document.getElementById('cancelBizBtn').style.display = 'inline-block';
             document.getElementById('saveBizBtn').textContent = '✎ Update Business';
@@ -1385,7 +1417,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW – FLEXBOX VERSION (NO display:table)
+        // RENDER PREVIEW – HTML TABLE with fixed pixel widths
         // ============================================================
         function renderPreview(data) {
             const container = document.getElementById('invoicePreview');
@@ -1396,7 +1428,7 @@
 
             const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
 
-            // Build rows as flex rows
+            // Build table rows
             let rowsHtml = '';
             items.forEach(i => {
                 let dateRange = '';
@@ -1407,12 +1439,12 @@
                 }
                 const descWithDate = i.description + (dateRange ? ' (' + dateRange + ')' : '');
                 rowsHtml += `
-                        <div class="row">
-                            <div class="cell col-desc">${descWithDate}</div>
-                            <div class="cell col-qty">${i.hours}</div>
-                            <div class="cell col-rate">${formatCurrency(i.rate)}</div>
-                            <div class="cell col-amount">${formatCurrency(i.amount)}</div>
-                        </div>
+                        <tr>
+                            <td class="col-desc">${descWithDate}</td>
+                            <td class="col-qty">${i.hours}</td>
+                            <td class="col-rate">${formatCurrency(i.rate)}</td>
+                            <td class="col-amount">${formatCurrency(i.amount)}</td>
+                        </tr>
                     `;
             });
 
@@ -1441,16 +1473,18 @@
                         ${client.email || ''}
                     </div>
 
-                    <!-- FLEXBOX TABLE -->
-                    <div class="inv-table">
-                        <div class="row header">
-                            <div class="cell col-desc">Description</div>
-                            <div class="cell col-qty">Qty/Hrs</div>
-                            <div class="cell col-rate">Rate</div>
-                            <div class="cell col-amount">Amount</div>
-                        </div>
-                        ${rowsHtml}
-                    </div>
+                    <!-- HTML TABLE with fixed pixel widths -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-desc">Description</th>
+                                <th class="col-qty">Qty/Hrs</th>
+                                <th class="col-rate">Rate</th>
+                                <th class="col-amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
 
                     <div class="totals">
                         <div>Subtotal: ${formatCurrency(subtotal)}</div>
@@ -2057,8 +2091,9 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App ready – FLEXBOX table!');
-        console.log('✅ PDF should now have perfectly aligned columns.');
+        console.log('🧾 Invoice App ready – HTML table with fixed pixel widths!');
+        console.log('✅ Demo data loaded – My Business Pty Ltd & Azure.');
+        console.log('✅ PDF should now have properly aligned columns on all devices.');
     </script>
 </body>
 </html>
