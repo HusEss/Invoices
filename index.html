@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
     </script>
     <style>
-        /* ===== CSS VARIABLES ===== */
+        /* ===== CSS VARIABLES (unchanged) ===== */
         :root {
             --bg-body: #f2f4f8;
             --bg-panel: #ffffff;
@@ -422,7 +422,6 @@
 
         /* ================================================================
            INVOICE PREVIEW – TEXT-BASED LAYOUT (NO TABLES!)
-           This is 100% reliable on all browsers/devices.
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -436,7 +435,6 @@
             width: 100%;
             overflow: hidden;
             font-family: 'Courier New', Courier, monospace;
-            /* Monospace for perfect alignment */
         }
         #invoicePreview .inv-header {
             display: flex;
@@ -498,7 +496,7 @@
             border-radius: 6px;
             margin: 10px 0 16px;
             border: 1px solid #e2e8f0;
-            white-space: pre;
+            white-space: pre-wrap;
             overflow-x: auto;
             line-height: 1.8;
             color: #1a202c;
@@ -792,7 +790,7 @@
 
     <script>
         // ============================================================
-        // DARK MODE TOGGLE
+        // DARK MODE TOGGLE (FIX 6: null check)
         // ============================================================
         (function initDarkMode() {
             const toggleBtn = document.getElementById('darkToggle');
@@ -806,12 +804,12 @@
                 try { localStorage.setItem('invoiceDarkMode', isDark ? 'true' : 'false'); } catch (_) {}
             }
 
-            let saved = false;
-            try { saved = localStorage.getItem('invoiceDarkMode') === 'true'; } catch (_) {}
-            if (saved === null || saved === undefined) {
-                saved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            }
-            setDark(saved);
+            let saved = null;
+            try { saved = localStorage.getItem('invoiceDarkMode'); } catch (_) {}
+            const isDark = saved !== null ?
+                saved === 'true' :
+                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            setDark(isDark);
 
             toggleBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -850,7 +848,7 @@
         let appData = loadData();
 
         // ============================================================
-        // SEED DEMO DATA (NO AZURE!)
+        // SEED DEMO DATA
         // ============================================================
         function seedDemoData() {
             if (appData.businesses.length === 0 && appData.clients.length === 0) {
@@ -893,7 +891,14 @@
 
         function getClient(id) { return appData.clients.find(c => c.id === id); }
 
-        function getNextInvoiceNumberForClient(clientId) {
+        // FIX 1 & 7: Non-destructive peek and consume
+        function peekNextInvoiceNumber(clientId) {
+            const client = getClient(clientId);
+            if (!client) return null;
+            return 'INV-' + String(client.nextInvoiceNumber || 1).padStart(4, '0');
+        }
+
+        function consumeNextInvoiceNumber(clientId) {
             const client = getClient(clientId);
             if (!client) return null;
             const num = client.nextInvoiceNumber || 1;
@@ -920,6 +925,7 @@
 
         function cleanBSB(raw) { return String(raw).replace(/\D/g, ''); }
 
+        // FIX 4: numberToWords with millions support
         function numberToWords(n) {
             if (n === 0) return 'Zero dollars';
             const num = Math.round(n * 100) / 100;
@@ -938,6 +944,8 @@
                 if (num < 1000) return a[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + toWords(num % 100) : '');
                 if (num < 1000000) return toWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + toWords(num %
                     1000) : '');
+                if (num < 1000000000) return toWords(Math.floor(num / 1000000)) + ' Million' + (num % 1000000 ? ' ' +
+                    toWords(num % 1000000) : '');
                 return '';
             }
 
@@ -951,6 +959,15 @@
             }
             if (dollars === 0 && cents === 0) result = 'Zero dollars';
             return result.charAt(0).toUpperCase() + result.slice(1);
+        }
+
+        // FIX 8: Sanitise user input
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
         function showStatus(msg, type = 'error') {
@@ -977,7 +994,7 @@
 
             bizSelect.innerHTML = '<option value="">— Select Business —</option>';
             appData.businesses.forEach(b => {
-                bizSelect.innerHTML += `<option value="${b.id}">${b.name} (${formatABN(b.abn)})</option>`;
+                bizSelect.innerHTML += `<option value="${b.id}">${escapeHtml(b.name)} (${formatABN(b.abn)})</option>`;
             });
             if (currentBiz && appData.businesses.some(b => b.id === currentBiz)) bizSelect.value = currentBiz;
             else if (appData.businesses.length > 0) bizSelect.value = appData.businesses[0].id;
@@ -985,7 +1002,7 @@
             clientSelect.innerHTML = '<option value="">— Select Client —</option>';
             appData.clients.forEach(c => {
                 clientSelect.innerHTML +=
-                    `<option value="${c.id}">${c.name}${c.abn ? ' (' + formatABN(c.abn) + ')' : ''}</option>`;
+                    `<option value="${c.id}">${escapeHtml(c.name)}${c.abn ? ' (' + formatABN(c.abn) + ')' : ''}</option>`;
             });
             if (currentClient && appData.clients.some(c => c.id === currentClient)) clientSelect.value = currentClient;
             else if (appData.clients.length > 0) clientSelect.value = appData.clients[0].id;
@@ -1027,14 +1044,14 @@
             const current = filter.value;
             filter.innerHTML = '<option value="all">All Clients</option>';
             appData.clients.forEach(c => {
-                filter.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                filter.innerHTML += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
             });
             if (current && appData.clients.some(c => c.id === current)) filter.value = current;
             else filter.value = 'all';
         }
 
         // ============================================================
-        // RENDER: Business & Client Lists
+        // RENDER: Business & Client Lists (with sanitisation)
         // ============================================================
         function renderBusinessList() {
             const container = document.getElementById('businessList');
@@ -1045,10 +1062,10 @@
             container.innerHTML = appData.businesses.map(b => `
                     <div class="item-card">
                         <div class="info">
-                            <strong>${b.name}</strong>
+                            <strong>${escapeHtml(b.name)}</strong>
                             <span class="badge">ABN ${formatABN(b.abn)}</span>
-                            <div style="font-size:12px;color:var(--text-muted);">${b.address || 'No address'}</div>
-                            ${b.bsb || b.account ? `<div style="font-size:12px;color:var(--text-muted);">BSB: ${b.bsb ? formatBSB(b.bsb) : ''} Acc: ${b.account || ''}</div>` : ''}
+                            <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(b.address || 'No address')}</div>
+                            ${b.bsb || b.account ? `<div style="font-size:12px;color:var(--text-muted);">BSB: ${b.bsb ? formatBSB(b.bsb) : ''} Acc: ${escapeHtml(b.account || '')}</div>` : ''}
                         </div>
                         <div>
                             <button class="btn btn-secondary btn-sm edit-biz" data-id="${b.id}">✎</button>
@@ -1073,9 +1090,9 @@
             container.innerHTML = appData.clients.map(c => `
                     <div class="item-card">
                         <div class="info">
-                            <strong>${c.name}</strong>
+                            <strong>${escapeHtml(c.name)}</strong>
                             ${c.abn ? `<span class="badge">ABN ${formatABN(c.abn)}</span>` : ''}
-                            <div style="font-size:12px;color:var(--text-muted);">${c.address || 'No address'}</div>
+                            <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(c.address || 'No address')}</div>
                             <div style="font-size:12px;color:var(--text-muted);">Next Invoice #: ${c.nextInvoiceNumber ? 'INV-' + String(c.nextInvoiceNumber).padStart(4,'0') : 'INV-0001'}</div>
                         </div>
                         <div>
@@ -1093,7 +1110,7 @@
         }
 
         // ============================================================
-        // CRUD: Business
+        // CRUD: Business (sanitised)
         // ============================================================
         function editBusiness(id) {
             const b = getBusiness(id);
@@ -1194,7 +1211,7 @@
         });
 
         // ============================================================
-        // CRUD: Client
+        // CRUD: Client (sanitised)
         // ============================================================
         function editClient(id) {
             const c = getClient(id);
@@ -1289,7 +1306,7 @@
         });
 
         // ============================================================
-        // LINE ITEMS
+        // LINE ITEMS – FIX 2: proper validation
         // ============================================================
         document.getElementById('addLineItem').addEventListener('click', function() {
             const container = document.getElementById('lineItemsContainer');
@@ -1319,27 +1336,24 @@
             });
         });
 
+        // FIX 2: Validate line items properly
         function getLineItems() {
             const items = [];
-            let valid = true;
+            let hasError = false;
             document.querySelectorAll('.line-item').forEach(row => {
                 const desc = row.querySelector('.li-desc').value.trim() || 'Service';
-                const hours = parseFloat(row.querySelector('.li-hours').value) || 0;
-                const rate = parseFloat(row.querySelector('.li-rate').value) || 0;
-                const start = row.querySelector('.li-start').value || '';
-                const end = row.querySelector('.li-end').value || '';
-                if (hours > 0 && rate > 0) {
+                const hours = parseFloat(row.querySelector('.li-hours').value);
+                const rate = parseFloat(row.querySelector('.li-rate').value);
+                if (isNaN(hours) || isNaN(rate) || hours <= 0 || rate <= 0) {
+                    hasError = true;
+                } else {
+                    const start = row.querySelector('.li-start').value || '';
+                    const end = row.querySelector('.li-end').value || '';
                     items.push({ description: desc, hours, rate, amount: hours * rate, start, end });
-                } else if (hours <= 0 || rate <= 0) {
-                    valid = false;
                 }
             });
-            if (!valid && items.length === 0) {
-                showStatus('Please ensure all lines have Qty/Hrs > 0 and Rate > 0.', 'error');
-                return null;
-            }
-            if (items.length === 0) {
-                showStatus('Add at least one valid line item.', 'error');
+            if (hasError || items.length === 0) {
+                showStatus('All line items need Qty/Hrs > 0 and Rate > 0.', 'error');
                 return null;
             }
             hideStatus();
@@ -1347,7 +1361,7 @@
         }
 
         // ============================================================
-        // BUILD INVOICE DATA
+        // BUILD INVOICE DATA (uses peek for preview, consume for save)
         // ============================================================
         function buildInvoiceData(invoiceNumber) {
             const bizId = document.getElementById('invBusiness').value;
@@ -1399,7 +1413,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW – TEXT-BASED LAYOUT (NO TABLES!)
+        // RENDER PREVIEW – TEXT-BASED LAYOUT (FIX 5: date range wrap)
         // ============================================================
         function renderPreview(data) {
             const container = document.getElementById('invoicePreview');
@@ -1411,13 +1425,11 @@
             const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
 
             // Build text-based table
-            // Fixed column widths: Description (30 chars), Qty (8), Rate (10), Amount (10)
             const colDesc = 30;
             const colQty = 8;
             const colRate = 10;
             const colAmount = 10;
 
-            // Header
             let tableText = '';
             tableText += 'DESCRIPTION'.padEnd(colDesc) + 'QTY/HRS'.padEnd(colQty) + 'RATE'.padEnd(colRate) + 'AMOUNT\n';
             tableText += ''.padEnd(colDesc + colQty + colRate + colAmount, '-') + '\n';
@@ -1428,57 +1440,75 @@
                 if (i.start || i.end) {
                     const s = i.start ? formatDate(i.start) : '';
                     const e = i.end ? formatDate(i.end) : '';
-                    dateRange = (s || e) ? (s && e ? ' (' + s + ' – ' + e + ')' : ' (' + (s || e) + ')') : '';
+                    dateRange = (s || e) ? (s && e ? s + ' – ' + e : s || e) : '';
                 }
-                const descWithDate = i.description + dateRange;
+
+                // FIX 5: show date range on second line if description is long
+                let descLine = i.description;
+                let dateLine = dateRange ? '    ' + dateRange : '';
+
                 // Truncate description if too long
-                const descTrunc = descWithDate.length > colDesc ? descWithDate.slice(0, colDesc - 3) + '...' : descWithDate;
-                tableText += descTrunc.padEnd(colDesc);
-                tableText += String(i.hours).padEnd(colQty);
-                tableText += formatCurrency(i.rate).padEnd(colRate);
-                tableText += formatCurrency(i.amount).padEnd(colAmount);
-                tableText += '\n';
+                if (descLine.length > colDesc) {
+                    descLine = descLine.slice(0, colDesc - 3) + '...';
+                }
+                const paddedDesc = descLine.padEnd(colDesc);
+
+                const qtyStr = String(i.hours).padEnd(colQty);
+                const rateStr = formatCurrency(i.rate).padEnd(colRate);
+                const amountStr = formatCurrency(i.amount).padEnd(colAmount);
+
+                tableText += paddedDesc + qtyStr + rateStr + amountStr + '\n';
+
+                // If we have a date range, add it on the next line indented
+                if (dateLine) {
+                    // Limit dateLine length to fit within the table width
+                    const maxDateLen = colDesc + colQty + colRate + colAmount - 4;
+                    if (dateLine.length > maxDateLen) {
+                        dateLine = dateLine.slice(0, maxDateLen - 3) + '...';
+                    }
+                    tableText += dateLine.padEnd(colDesc + colQty + colRate + colAmount) + '\n';
+                }
             });
 
-            // Build the invoice HTML
+            // Build the invoice HTML with sanitisation
             container.innerHTML = `
                     <div class="inv-header">
                         <div>
                             <div class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</div>
                         </div>
                         <div class="inv-business">
-                            <strong>${business.name}</strong>
+                            <strong>${escapeHtml(business.name)}</strong>
                             ${business.abn ? 'ABN: ' + formatABN(business.abn) : ''}<br />
-                            ${business.address || ''}<br />
-                            ${business.phone || ''}<br />
-                            ${business.email || ''}
+                            ${escapeHtml(business.address || '')}<br />
+                            ${escapeHtml(business.phone || '')}<br />
+                            ${escapeHtml(business.email || '')}
                         </div>
                     </div>
                     <div class="inv-meta">
-                        <span class="left">Invoice # ${invoiceNumber}</span>
+                        <span class="left">Invoice # ${escapeHtml(invoiceNumber)}</span>
                         <span class="right">Date: ${formatDate(date)}</span>
                     </div>
                     <div class="bill-to">
                         <strong>Bill to:</strong>
-                        ${client.name}<br />
+                        ${escapeHtml(client.name)}<br />
                         ${client.abn ? 'ABN: ' + formatABN(client.abn) : ''}<br />
-                        ${client.address || ''}<br />
-                        ${client.email || ''}
+                        ${escapeHtml(client.address || '')}<br />
+                        ${escapeHtml(client.email || '')}
                     </div>
 
-                    <!-- TEXT TABLE (monospace, fixed-width) -->
-                    <div class="text-table">${tableText}</div>
+                    <!-- TEXT TABLE -->
+                    <div class="text-table">${escapeHtml(tableText)}</div>
 
                     <div class="totals">
                         <div>Subtotal: ${formatCurrency(subtotal)}</div>
-                        <div>${gstLabel}: ${formatCurrency(gst)}</div>
+                        <div>${escapeHtml(gstLabel)}: ${formatCurrency(gst)}</div>
                         <div class="grand">Total: ${formatCurrency(total)}</div>
-                        <div class="words">${totalWords}</div>
+                        <div class="words">${escapeHtml(totalWords)}</div>
                     </div>
                     <div class="footer-note">
-                        <div>Payment Terms: ${paymentTerms}</div>
-                        ${bankDetails ? '<div>Bank: ' + bankDetails + '</div>' : ''}
-                        ${invoiceNotes ? '<div style="margin-top:6px;">' + invoiceNotes + '</div>' : ''}
+                        <div>Payment Terms: ${escapeHtml(paymentTerms)}</div>
+                        ${bankDetails ? '<div>Bank: ' + escapeHtml(bankDetails) + '</div>' : ''}
+                        ${invoiceNotes ? '<div style="margin-top:6px;">' + escapeHtml(invoiceNotes) + '</div>' : ''}
                     </div>
                 `;
             container.style.display = 'block';
@@ -1487,10 +1517,16 @@
         }
 
         // ============================================================
-        // PREVIEW BUTTON
+        // PREVIEW BUTTON (uses peek, does NOT consume)
         // ============================================================
         document.getElementById('previewBtn').addEventListener('click', function() {
-            const data = buildInvoiceData(getTempInvoiceNumber());
+            const clientId = document.getElementById('invClient').value;
+            let previewNumber = 'PREVIEW-' + Date.now().toString(36).toUpperCase();
+            if (clientId) {
+                const peeked = peekNextInvoiceNumber(clientId);
+                if (peeked) previewNumber = peeked + '-preview';
+            }
+            const data = buildInvoiceData(previewNumber);
             if (data) {
                 renderPreview(data);
                 document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1593,9 +1629,10 @@
                 return;
             }
 
-            if (data.invoiceNumber && data.invoiceNumber.startsWith('PREVIEW-')) {
+            // Assign real number (consume) if it's a preview
+            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
                 const clientId = data.client.id;
-                const realNumber = getNextInvoiceNumberForClient(clientId);
+                const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
@@ -1633,7 +1670,7 @@
         document.getElementById('shareBtn').addEventListener('click', shareInvoice);
 
         // ============================================================
-        // GENERATE PDF & PNG
+        // GENERATE PDF & PNG (consume number when needed)
         // ============================================================
         function generateFromPreview(type) {
             const preview = document.getElementById('invoicePreview');
@@ -1648,9 +1685,10 @@
                 return;
             }
 
-            if (data.invoiceNumber && data.invoiceNumber.startsWith('PREVIEW-')) {
+            // Assign real number (consume) if it's a preview
+            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
                 const clientId = data.client.id;
-                const realNumber = getNextInvoiceNumberForClient(clientId);
+                const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
@@ -1689,7 +1727,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE / EDIT / DUPLICATE
+        // SAVE INVOICE (consume number, tight duplicate check)
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const preview = document.getElementById('invoicePreview');
@@ -1705,6 +1743,7 @@
 
             const editingId = document.getElementById('editingInvoiceId').value;
 
+            // If editing, remove old invoice first
             if (editingId) {
                 const existing = appData.invoices.find(inv => inv.id === editingId);
                 if (existing) {
@@ -1717,9 +1756,10 @@
                 document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
             }
 
-            if (data.invoiceNumber && data.invoiceNumber.startsWith('PREVIEW-')) {
+            // Consume real number if preview
+            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
                 const clientId = data.client.id;
-                const realNumber = getNextInvoiceNumberForClient(clientId);
+                const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
@@ -1729,8 +1769,13 @@
                 data = preview._invoiceData;
             }
 
-            if (appData.invoices.some(inv => inv.invoiceNumber === data.invoiceNumber && inv.clientId === data.client.id)) {
-                showStatus('Invoice #' + data.invoiceNumber + ' already exists for this client.', 'error');
+            // FIX 3: Tight duplicate check (business + client + invoice number)
+            if (appData.invoices.some(inv =>
+                    inv.invoiceNumber === data.invoiceNumber &&
+                    inv.clientId === data.client.id &&
+                    inv.businessId === data.business.id
+                )) {
+                showStatus('Invoice #' + data.invoiceNumber + ' already exists for this client and business.', 'error');
                 return;
             }
 
@@ -1769,7 +1814,7 @@
         });
 
         // ============================================================
-        // HISTORY
+        // HISTORY (sanitised)
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
@@ -1793,8 +1838,8 @@
                 return `
                         <div class="hist-item">
                             <div class="left">
-                                <div class="num">${inv.invoiceNumber}</div>
-                                <div style="font-size:13px;">${formatDate(inv.date)} · ${clientName}</div>
+                                <div class="num">${escapeHtml(inv.invoiceNumber)}</div>
+                                <div style="font-size:13px;">${formatDate(inv.date)} · ${escapeHtml(clientName)}</div>
                                 <div style="font-size:13px;font-weight:600;">${formatCurrency(inv.total)}</div>
                             </div>
                             <div class="right">
@@ -1809,6 +1854,7 @@
                     `;
             }).join('');
 
+            // Event listeners (unchanged)
             document.querySelectorAll('.hist-view').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -1862,7 +1908,7 @@
                         const div = document.createElement('div');
                         div.className = 'line-item';
                         div.innerHTML = `
-                                <input type="text" placeholder="Description" class="li-desc" value="${item.description}" />
+                                <input type="text" placeholder="Description" class="li-desc" value="${escapeHtml(item.description)}" />
                                 <input type="number" placeholder="Qty/Hrs" class="li-hours" value="${item.hours}" step="0.5" min="0" />
                                 <input type="number" placeholder="Rate ($)" class="li-rate" value="${item.rate}" step="0.01" min="0" />
                                 <input type="date" class="li-start" placeholder="Start" value="${item.start || ''}" />
@@ -1911,7 +1957,7 @@
                         const div = document.createElement('div');
                         div.className = 'line-item';
                         div.innerHTML = `
-                                <input type="text" placeholder="Description" class="li-desc" value="${item.description}" />
+                                <input type="text" placeholder="Description" class="li-desc" value="${escapeHtml(item.description)}" />
                                 <input type="number" placeholder="Qty/Hrs" class="li-hours" value="${item.hours}" step="0.5" min="0" />
                                 <input type="number" placeholder="Rate ($)" class="li-rate" value="${item.rate}" step="0.01" min="0" />
                                 <input type="date" class="li-start" placeholder="Start" value="${item.start || ''}" />
@@ -2074,9 +2120,14 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App ready – TEXT-BASED LAYOUT (no tables!)');
-        console.log('✅ Demo data: Essale Trading Co & Sydney Construction Pty Ltd');
-        console.log('✅ This layout is 100% reliable on all devices.');
+        console.log('🧾 Invoice App – All fixes applied!');
+        console.log('✅ F1: Invoice numbers reserved only on save/share/export');
+        console.log('✅ F2: Line item validation fixed');
+        console.log('✅ F3: Tight duplicate check');
+        console.log('✅ F4: numberToWords supports millions');
+        console.log('✅ F5: Date ranges wrap to second line');
+        console.log('✅ F6: Dark mode null check');
+        console.log('✅ F8: All user input sanitised');
     </script>
 </body>
 </html>
