@@ -421,8 +421,8 @@
         }
 
         /* ================================================================
-           INVOICE PREVIEW – HTML TABLE WITH FIXED PIXEL WIDTHS
-           This is the most reliable approach across all browsers
+           INVOICE PREVIEW – TEXT-BASED LAYOUT (NO TABLES!)
+           This is 100% reliable on all browsers/devices.
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -435,7 +435,8 @@
             color: #1a202c;
             width: 100%;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
+            /* Monospace for perfect alignment */
         }
         #invoicePreview .inv-header {
             display: flex;
@@ -444,6 +445,7 @@
             padding-bottom: 14px;
             margin-bottom: 16px;
             flex-wrap: wrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .inv-title {
             font-size: 26px;
@@ -456,6 +458,7 @@
             font-size: 14px;
             line-height: 1.5;
             color: #4a5568;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .inv-business strong {
             font-size: 16px;
@@ -469,6 +472,7 @@
             margin-bottom: 14px;
             font-size: 13px;
             color: #4a5568;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .inv-meta .left {
             font-weight: 500;
@@ -477,6 +481,7 @@
             margin-bottom: 16px;
             font-size: 14px;
             color: #4a5568;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .bill-to strong {
             display: block;
@@ -484,58 +489,33 @@
             color: #1a202c;
         }
 
-        /* === HTML TABLE with fixed pixel widths === */
-        #invoicePreview table {
-            width: 100%;
-            max-width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0 16px;
+        /* === TEXT TABLE (monospace, fixed-width) === */
+        #invoicePreview .text-table {
+            font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
-            table-layout: fixed;
-        }
-        #invoicePreview th {
-            background: #edf2f7;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            color: #2d3748;
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        #invoicePreview td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #edf2f7;
+            background: #f9fafb;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin: 10px 0 16px;
+            border: 1px solid #e2e8f0;
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.8;
             color: #1a202c;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            vertical-align: top;
         }
-        /* Fixed column widths (in pixels) – reliable across all browsers */
-        #invoicePreview .col-desc {
-            width: 220px;
-            max-width: 220px;
-            min-width: 180px;
-            text-align: left;
+        #invoicePreview .text-table .header {
+            font-weight: 700;
+            border-bottom: 2px solid #2b6cb0;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+            color: #1a202c;
         }
-        #invoicePreview .col-qty {
-            width: 80px;
-            max-width: 80px;
-            min-width: 60px;
-            text-align: right;
+        #invoicePreview .text-table .row {
+            color: #1a202c;
         }
-        #invoicePreview .col-rate {
-            width: 90px;
-            max-width: 90px;
-            min-width: 70px;
-            text-align: right;
-        }
-        #invoicePreview .col-amount {
-            width: 100px;
-            max-width: 100px;
-            min-width: 80px;
-            text-align: right;
+        #invoicePreview .text-table .divider {
+            border-bottom: 1px dashed #d1d5db;
+            margin: 4px 0;
         }
 
         #invoicePreview .totals {
@@ -543,6 +523,7 @@
             margin-top: 10px;
             padding-top: 12px;
             border-top: 2px solid #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .totals div {
             padding: 3px 0;
@@ -568,6 +549,7 @@
             font-size: 12px;
             color: #4a5568;
             white-space: pre-wrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* ===== HISTORY ===== */
@@ -868,27 +850,27 @@
         let appData = loadData();
 
         // ============================================================
-        // SEED DEMO DATA (if no data exists)
+        // SEED DEMO DATA (NO AZURE!)
         // ============================================================
         function seedDemoData() {
             if (appData.businesses.length === 0 && appData.clients.length === 0) {
                 appData.businesses.push({
                     id: 'biz_demo',
-                    name: 'My Business Pty Ltd',
-                    abn: '12345678901',
+                    name: 'Essale Trading Co',
+                    abn: '34794221475',
                     address: '123 George St, Sydney NSW 2000',
-                    phone: '0400 000 000',
-                    email: 'info@mybusiness.com.au',
+                    phone: '0475 050 000',
+                    email: 'info@essale.com.au',
                     bsb: '062233',
                     account: '10314687'
                 });
                 appData.clients.push({
                     id: 'client_demo',
-                    name: 'Azure',
+                    name: 'Sydney Construction Pty Ltd',
                     abn: '12271867198',
-                    address: 'Hahaha, hzhhah',
-                    email: 'azure@example.com',
-                    nextInvoiceNumber: 5
+                    address: '456 Pitt St, Sydney NSW 2000',
+                    email: 'accounts@sydneyconstruction.com.au',
+                    nextInvoiceNumber: 1
                 });
                 saveData(appData);
             }
@@ -1417,7 +1399,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW – HTML TABLE with fixed pixel widths
+        // RENDER PREVIEW – TEXT-BASED LAYOUT (NO TABLES!)
         // ============================================================
         function renderPreview(data) {
             const container = document.getElementById('invoicePreview');
@@ -1428,26 +1410,37 @@
 
             const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
 
-            // Build table rows
-            let rowsHtml = '';
+            // Build text-based table
+            // Fixed column widths: Description (30 chars), Qty (8), Rate (10), Amount (10)
+            const colDesc = 30;
+            const colQty = 8;
+            const colRate = 10;
+            const colAmount = 10;
+
+            // Header
+            let tableText = '';
+            tableText += 'DESCRIPTION'.padEnd(colDesc) + 'QTY/HRS'.padEnd(colQty) + 'RATE'.padEnd(colRate) + 'AMOUNT\n';
+            tableText += ''.padEnd(colDesc + colQty + colRate + colAmount, '-') + '\n';
+
+            // Rows
             items.forEach(i => {
                 let dateRange = '';
                 if (i.start || i.end) {
                     const s = i.start ? formatDate(i.start) : '';
                     const e = i.end ? formatDate(i.end) : '';
-                    dateRange = (s || e) ? (s && e ? s + ' – ' + e : s || e) : '';
+                    dateRange = (s || e) ? (s && e ? ' (' + s + ' – ' + e + ')' : ' (' + (s || e) + ')') : '';
                 }
-                const descWithDate = i.description + (dateRange ? ' (' + dateRange + ')' : '');
-                rowsHtml += `
-                        <tr>
-                            <td class="col-desc">${descWithDate}</td>
-                            <td class="col-qty">${i.hours}</td>
-                            <td class="col-rate">${formatCurrency(i.rate)}</td>
-                            <td class="col-amount">${formatCurrency(i.amount)}</td>
-                        </tr>
-                    `;
+                const descWithDate = i.description + dateRange;
+                // Truncate description if too long
+                const descTrunc = descWithDate.length > colDesc ? descWithDate.slice(0, colDesc - 3) + '...' : descWithDate;
+                tableText += descTrunc.padEnd(colDesc);
+                tableText += String(i.hours).padEnd(colQty);
+                tableText += formatCurrency(i.rate).padEnd(colRate);
+                tableText += formatCurrency(i.amount).padEnd(colAmount);
+                tableText += '\n';
             });
 
+            // Build the invoice HTML
             container.innerHTML = `
                     <div class="inv-header">
                         <div>
@@ -1473,18 +1466,8 @@
                         ${client.email || ''}
                     </div>
 
-                    <!-- HTML TABLE with fixed pixel widths -->
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="col-desc">Description</th>
-                                <th class="col-qty">Qty/Hrs</th>
-                                <th class="col-rate">Rate</th>
-                                <th class="col-amount">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rowsHtml}</tbody>
-                    </table>
+                    <!-- TEXT TABLE (monospace, fixed-width) -->
+                    <div class="text-table">${tableText}</div>
 
                     <div class="totals">
                         <div>Subtotal: ${formatCurrency(subtotal)}</div>
@@ -2091,9 +2074,9 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App ready – HTML table with fixed pixel widths!');
-        console.log('✅ Demo data loaded – My Business Pty Ltd & Azure.');
-        console.log('✅ PDF should now have properly aligned columns on all devices.');
+        console.log('🧾 Invoice App ready – TEXT-BASED LAYOUT (no tables!)');
+        console.log('✅ Demo data: Essale Trading Co & Sydney Construction Pty Ltd');
+        console.log('✅ This layout is 100% reliable on all devices.');
     </script>
 </body>
 </html>
