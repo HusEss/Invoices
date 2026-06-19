@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Invoice · Australia</title>
     <link rel="manifest" href="manifest.json">
+    <title>Invoice · Australia</title>
     <!-- jsPDF & html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
@@ -167,10 +167,7 @@
         .panel.active {
             display: block;
         }
-        /* ===== SEARCH BAR ===== */
-        .search-wrap {
-            margin-bottom: 10px;
-        }
+        /* ===== SEARCH ===== */
         .search-wrap input {
             padding: 8px 14px;
             font-size: 15px;
@@ -184,7 +181,7 @@
             outline: none;
             border-color: var(--accent);
         }
-        /* ===== FORM ELEMENTS ===== */
+        /* ===== FORM ===== */
         label {
             font-weight: 600;
             font-size: 14px;
@@ -193,9 +190,7 @@
             margin-bottom: 4px;
             color: var(--text-secondary);
         }
-        input,
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px 14px;
             border: 1.5px solid var(--border-input);
@@ -206,9 +201,7 @@
             transition: 0.15s;
             font-family: inherit;
         }
-        input:focus,
-        select:focus,
-        textarea:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
             background: var(--bg-panel);
@@ -218,7 +211,6 @@
             min-height: 60px;
             resize: vertical;
         }
-        /* ===== BUTTONS ===== */
         .btn {
             background: var(--accent);
             color: white;
@@ -235,21 +227,13 @@
             touch-action: manipulation;
             letter-spacing: 0.3px;
         }
-        .btn:active {
-            transform: scale(0.97);
-        }
+        .btn:active { transform: scale(0.97); }
         .btn-secondary {
             background: var(--btn-secondary-bg);
             color: var(--btn-secondary-text);
         }
-        .btn-danger {
-            background: #e53e3e;
-            color: white;
-        }
-        .btn-success {
-            background: #38a169;
-            color: white;
-        }
+        .btn-danger { background: #e53e3e; color: white; }
+        .btn-success { background: #38a169; color: white; }
         .btn-sm {
             padding: 8px 16px;
             font-size: 14px;
@@ -268,9 +252,8 @@
             min-width: 80px;
             margin-top: 4px;
         }
-        .flex .btn-sm {
-            flex: 0 1 auto;
-        }
+        .flex .btn-sm { flex: 0 1 auto; }
+
         /* ===== ITEM CARDS ===== */
         .item-card {
             background: var(--bg-item);
@@ -312,6 +295,7 @@
             border: 0;
             border-top: 1.5px solid var(--border-light);
         }
+
         /* ===== LINE ITEMS ===== */
         .line-item {
             display: flex;
@@ -322,20 +306,11 @@
             border-radius: 12px;
             margin-bottom: 8px;
             border: 1px solid var(--border-card);
-            transition: background 0.3s, border 0.3s;
             align-items: center;
         }
-        .line-item .li-desc {
-            flex: 2 1 120px;
-            min-width: 100px;
-        }
-        .line-item .li-hours,
-        .line-item .li-rate {
-            flex: 0 1 70px;
-            min-width: 60px;
-        }
-        .line-item .li-start,
-        .line-item .li-end {
+        .line-item .li-desc { flex: 2 1 120px; min-width: 100px; }
+        .line-item .li-hours, .line-item .li-rate { flex: 0 1 70px; min-width: 60px; }
+        .line-item .li-start, .line-item .li-end {
             flex: 0 1 90px;
             min-width: 70px;
             padding: 8px 8px;
@@ -355,6 +330,7 @@
             border-width: 1px;
             border-radius: 8px;
         }
+
         /* ===== TOGGLE ===== */
         .toggle-wrap {
             display: flex;
@@ -396,7 +372,8 @@
             font-weight: 500;
             color: var(--text-secondary);
         }
-        /* ===== STATUS MESSAGE ===== */
+
+        /* ===== STATUS ===== */
         #statusMsg {
             padding: 10px 14px;
             border-radius: 12px;
@@ -415,17 +392,13 @@
             color: #276749;
             display: block;
         }
-        body.dark-mode #statusMsg.error {
-            color: #fca5a5;
-        }
-        body.dark-mode #statusMsg.success {
-            color: #86efac;
-        }
+        body.dark-mode #statusMsg.error { color: #fca5a5; }
+        body.dark-mode #statusMsg.success { color: #86efac; }
+
         /* ===== INVOICE PREVIEW ===== */
         #invoicePreview {
             background: white;
             padding: 28px 24px;
-            border-radius: 0;
             border: 1px solid #e2e8f0;
             margin: 16px 0;
             font-size: 13px;
@@ -433,7 +406,6 @@
             box-shadow: var(--shadow-card);
             color: #1a202c;
             width: 100%;
-            max-width: 100%;
             overflow: hidden;
         }
         #invoicePreview .inv-header {
@@ -469,9 +441,7 @@
             font-size: 13px;
             color: #4a5568;
         }
-        #invoicePreview .inv-meta .left {
-            font-weight: 500;
-        }
+        #invoicePreview .inv-meta .left { font-weight: 500; }
         #invoicePreview .bill-to {
             margin-bottom: 16px;
             font-size: 14px;
@@ -482,35 +452,29 @@
             font-size: 15px;
             color: #1a202c;
         }
+        /* Table – fixed with inline styles now, but we keep these as fallback */
         #invoicePreview table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
             margin: 10px 0 16px;
             font-size: 13px;
-            table-layout: fixed;
+        }
+        #invoicePreview th,
+        #invoicePreview td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #edf2f7;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            vertical-align: top;
         }
         #invoicePreview th {
             background: #edf2f7;
-            text-align: left;
-            padding: 10px 8px;
             font-weight: 600;
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.4px;
             color: #2d3748;
-        }
-        #invoicePreview th:nth-child(1) { width: 35%; }
-        #invoicePreview th:nth-child(2) { width: 15%; }
-        #invoicePreview th:nth-child(3) { width: 15%; }
-        #invoicePreview th:nth-child(4) { width: 15%; }
-        #invoicePreview th:nth-child(5) { width: 20%; }
-        #invoicePreview td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #edf2f7;
-            color: #1a202c;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            vertical-align: top;
         }
         #invoicePreview .totals {
             text-align: right;
@@ -543,7 +507,8 @@
             color: #4a5568;
             white-space: pre-wrap;
         }
-        /* ===== HISTORY FILTER ===== */
+
+        /* ===== HISTORY ===== */
         .history-filter {
             display: flex;
             gap: 10px;
@@ -567,7 +532,6 @@
             color: var(--text-primary);
             border: 1.5px solid var(--border-input);
         }
-        /* ===== HISTORY ITEM ===== */
         .hist-item {
             background: var(--bg-item);
             border-radius: 14px;
@@ -578,52 +542,29 @@
             align-items: center;
             flex-wrap: wrap;
             border: 1px solid var(--border-card);
-            transition: background 0.3s, border 0.3s;
         }
         .hist-item .left .num {
             font-weight: 700;
             font-size: 16px;
             color: var(--text-primary);
         }
-        .hist-item .left {
-            color: var(--text-secondary);
-        }
+        .hist-item .left { color: var(--text-secondary); }
         .hist-item .right .btn {
             width: auto;
             padding: 6px 14px;
             font-size: 13px;
             margin-top: 0;
         }
-        /* ===== RESPONSIVE ===== */
+
         @media (max-width: 480px) {
-            .tabs .tab-btn {
-                font-size: 12px;
-                padding: 8px 0;
-                min-width: 50px;
-            }
-            #invoicePreview {
-                padding: 16px 12px;
-                font-size: 12px;
-            }
-            #invoicePreview .inv-title {
-                font-size: 22px;
-            }
-            #invoicePreview .inv-business {
-                font-size: 12px;
-            }
-            .line-item input {
-                font-size: 14px;
-            }
-            .line-item .li-desc {
-                flex: 1 1 100%;
-            }
-            .line-item .li-start,
-            .line-item .li-end {
-                flex: 1 1 40%;
-            }
-            .dark-toggle span {
-                display: none;
-            }
+            .tabs .tab-btn { font-size: 12px; padding: 8px 0; min-width: 50px; }
+            #invoicePreview { padding: 16px 12px; font-size: 12px; }
+            #invoicePreview .inv-title { font-size: 22px; }
+            #invoicePreview .inv-business { font-size: 12px; }
+            .line-item input { font-size: 14px; }
+            .line-item .li-desc { flex: 1 1 100%; }
+            .line-item .li-start, .line-item .li-end { flex: 1 1 40%; }
+            .dark-toggle span { display: none; }
         }
     </style>
 </head>
@@ -869,7 +810,6 @@
 
         function getTempInvoiceNumber() { return 'PREVIEW-' + Date.now().toString(36).toUpperCase(); }
 
-        // ---- ABN formatting ----
         function formatABN(raw) {
             const digits = String(raw).replace(/\D/g, '');
             if (digits.length !== 11) return raw;
@@ -878,7 +818,6 @@
 
         function cleanABN(raw) { return String(raw).replace(/\D/g, ''); }
 
-        // ---- BSB formatting ----
         function formatBSB(raw) {
             const digits = String(raw).replace(/\D/g, '');
             if (digits.length !== 6) return raw;
@@ -887,15 +826,13 @@
 
         function cleanBSB(raw) { return String(raw).replace(/\D/g, ''); }
 
-        // ---- Number to Words (Australian dollars) ----
         function numberToWords(n) {
             if (n === 0) return 'Zero dollars';
             const num = Math.round(n * 100) / 100;
             const dollars = Math.floor(num);
             const cents = Math.round((num - dollars) * 100);
 
-            const a = [
-                '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+            const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
                 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
             ];
             const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -922,7 +859,6 @@
             return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
-        // ---- Status messages ----
         function showStatus(msg, type = 'error') {
             const el = document.getElementById('statusMsg');
             el.textContent = msg;
@@ -964,7 +900,7 @@
         }
 
         // ============================================================
-        // SEARCH FILTERS (Clients & Businesses)
+        // SEARCH FILTERS
         // ============================================================
         function filterClientList() {
             const search = document.getElementById('clientSearch').value.toLowerCase().trim();
@@ -974,11 +910,6 @@
                 const text = item.textContent.toLowerCase();
                 item.style.display = search === '' || text.includes(search) ? 'flex' : 'none';
             });
-            // If no items visible, show empty state
-            const visible = container.querySelectorAll('.item-card[style*="display: flex"], .item-card:not([style])').length;
-            if (visible === 0 && appData.clients.length > 0) {
-                // We'll handle this in render
-            }
         }
 
         function filterBusinessList() {
@@ -1009,7 +940,7 @@
         }
 
         // ============================================================
-        // RENDER: Business & Client Lists (with search support)
+        // RENDER: Business & Client Lists
         // ============================================================
         function renderBusinessList() {
             const container = document.getElementById('businessList');
@@ -1160,6 +1091,13 @@
                 if (clean.length === 6) this.value = formatBSB(clean);
             }
         });
+        document.getElementById('bizAbn').addEventListener('blur', function() {
+            const raw = this.value.trim();
+            if (raw) {
+                const clean = cleanABN(raw);
+                if (clean.length === 11) this.value = formatABN(clean);
+            }
+        });
 
         // ============================================================
         // CRUD: Client
@@ -1249,13 +1187,6 @@
         }
 
         document.getElementById('clientAbn').addEventListener('blur', function() {
-            const raw = this.value.trim();
-            if (raw) {
-                const clean = cleanABN(raw);
-                if (clean.length === 11) this.value = formatABN(clean);
-            }
-        });
-        document.getElementById('bizAbn').addEventListener('blur', function() {
             const raw = this.value.trim();
             if (raw) {
                 const clean = cleanABN(raw);
@@ -1374,7 +1305,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW
+        // RENDER PREVIEW (with fixed table columns via inline styles)
         // ============================================================
         function renderPreview(data) {
             const container = document.getElementById('invoicePreview');
@@ -1395,10 +1326,10 @@
                 const descWithDate = i.description + (dateRange ? ' (' + dateRange + ')' : '');
                 return `
                         <tr>
-                            <td>${descWithDate}</td>
-                            <td style="text-align:right;">${i.hours}</td>
-                            <td style="text-align:right;">${formatCurrency(i.rate)}</td>
-                            <td style="text-align:right;">${formatCurrency(i.amount)}</td>
+                            <td style="width:40%; padding:8px; text-align:left; word-wrap:break-word; vertical-align:top;">${descWithDate}</td>
+                            <td style="width:20%; padding:8px; text-align:right;">${i.hours}</td>
+                            <td style="width:20%; padding:8px; text-align:right;">${formatCurrency(i.rate)}</td>
+                            <td style="width:20%; padding:8px; text-align:right;">${formatCurrency(i.amount)}</td>
                         </tr>
                     `;
             }).join('');
@@ -1427,8 +1358,15 @@
                         ${client.address || ''}<br />
                         ${client.email || ''}
                     </div>
-                    <table>
-                        <thead><tr><th>Description</th><th style="text-align:right;">Qty/Hrs</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Amount</th></tr></thead>
+                    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                        <thead>
+                            <tr>
+                                <th style="width:40%; text-align:left; padding:8px;">Description</th>
+                                <th style="width:20%; text-align:right; padding:8px;">Qty/Hrs</th>
+                                <th style="width:20%; text-align:right; padding:8px;">Rate</th>
+                                <th style="width:20%; text-align:right; padding:8px;">Amount</th>
+                            </tr>
+                        </thead>
                         <tbody>${rows}</tbody>
                     </table>
                     <div class="totals">
@@ -1460,7 +1398,7 @@
         });
 
         // ============================================================
-        // CAPTURE (with 10mm safe zone & light mode)
+        // CAPTURE & PDF GENERATION (with auto‑fit to page)
         // ============================================================
         function captureInvoiceLight(previewElement) {
             const body = document.body;
@@ -1470,12 +1408,11 @@
             const originalBg = previewElement.style.background;
             previewElement.style.background = '#ffffff';
 
-            // Add extra padding to avoid cropping
-            const originalPadding = previewElement.style.padding;
+            // Force a known good padding
             previewElement.style.padding = '28px 24px';
 
             return html2canvas(previewElement, {
-                scale: 2.5,
+                scale: 3, // sharper
                 backgroundColor: '#ffffff',
                 useCORS: true,
                 logging: false,
@@ -1492,12 +1429,11 @@
                 }
             }).then(canvas => {
                 previewElement.style.background = originalBg || '';
-                previewElement.style.padding = originalPadding || '';
+                previewElement.style.padding = '28px 24px'; // keep consistent
                 if (wasDark) body.classList.add('dark-mode');
                 return canvas;
             }).catch(err => {
                 previewElement.style.background = originalBg || '';
-                previewElement.style.padding = originalPadding || '';
                 if (wasDark) body.classList.add('dark-mode');
                 throw err;
             });
@@ -1514,16 +1450,35 @@
             const imgData = canvas.toDataURL('image/png');
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = 190;
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            doc.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 10; // 10mm margins
+
+            const maxWidth = pageWidth - 2 * margin;
+            const maxHeight = pageHeight - 2 * margin;
+
+            // Calculate image dimensions in mm
+            let imgWidth = maxWidth;
+            let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // If height exceeds maxHeight, scale down proportionally
+            if (imgHeight > maxHeight) {
+                imgHeight = maxHeight;
+                imgWidth = (canvas.width * imgHeight) / canvas.height;
+            }
+
+            // Center the image on the page
+            const xOffset = (pageWidth - imgWidth) / 2;
+            const yOffset = (pageHeight - imgHeight) / 2;
+
+            doc.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
             doc.save(filename);
         }
 
         // ============================================================
         // SHARE (Web Share API)
         // ============================================================
-        async function shareInvoice(type) {
+        async function shareInvoice() {
             const preview = document.getElementById('invoicePreview');
             if (!preview.style.display || preview.style.display === 'none') {
                 showStatus('Please preview the invoice first.', 'error');
@@ -1561,7 +1516,6 @@
                     showStatus('✅ Shared successfully!', 'success');
                     setTimeout(hideStatus, 3000);
                 } else {
-                    // Fallback: download
                     downloadImage(canvas, `invoice-${data.invoiceNumber}.png`);
                     showStatus('📥 Downloaded (Share not supported)', 'success');
                     setTimeout(hideStatus, 3000);
@@ -1574,7 +1528,7 @@
             }
         }
 
-        document.getElementById('shareBtn').addEventListener('click', () => shareInvoice('png'));
+        document.getElementById('shareBtn').addEventListener('click', shareInvoice);
 
         // ============================================================
         // GENERATE PDF & PNG
@@ -1633,7 +1587,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE INVOICE TO HISTORY (with Edit/Duplicate support)
+        // SAVE / EDIT / DUPLICATE (unchanged, included for completeness)
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const preview = document.getElementById('invoicePreview');
@@ -1649,11 +1603,9 @@
 
             const editingId = document.getElementById('editingInvoiceId').value;
 
-            // If we're editing, remove the old invoice first
             if (editingId) {
                 const existing = appData.invoices.find(inv => inv.id === editingId);
                 if (existing) {
-                    // Keep the same invoice number
                     data.invoiceNumber = existing.invoiceNumber;
                     appData.invoices = appData.invoices.filter(inv => inv.id !== editingId);
                 }
@@ -1663,7 +1615,6 @@
                 document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
             }
 
-            // Assign real number if preview
             if (data.invoiceNumber && data.invoiceNumber.startsWith('PREVIEW-')) {
                 const clientId = data.client.id;
                 const realNumber = getNextInvoiceNumberForClient(clientId);
@@ -1676,7 +1627,6 @@
                 data = preview._invoiceData;
             }
 
-            // Check duplicate
             if (appData.invoices.some(inv => inv.invoiceNumber === data.invoiceNumber && inv.clientId === data.client.id)) {
                 showStatus('Invoice #' + data.invoiceNumber + ' already exists for this client.', 'error');
                 return;
@@ -1717,7 +1667,7 @@
         });
 
         // ============================================================
-        // HISTORY (with Edit & Duplicate)
+        // HISTORY (unchanged, included for completeness)
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
@@ -1757,7 +1707,7 @@
                     `;
             }).join('');
 
-            // ---- View ----
+            // Attach event listeners (same as before)
             document.querySelectorAll('.hist-view').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -1786,7 +1736,6 @@
                 });
             });
 
-            // ---- Edit ----
             document.querySelectorAll('.hist-edit').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -1795,23 +1744,20 @@
                     const client = getClient(inv.clientId);
                     if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
 
-                    // Load into edit mode
                     document.getElementById('editingInvoiceId').value = inv.id;
                     document.getElementById('editingInvoiceNumber').value = inv.invoiceNumber;
                     document.getElementById('cancelEditBtn').style.display = 'inline-block';
                     document.getElementById('saveInvoiceBtn').textContent = '✎ Update Invoice';
 
-                    // Populate form
                     document.getElementById('invBusiness').value = biz.id;
                     document.getElementById('invClient').value = client.id;
                     document.getElementById('includeGST').checked = inv.includeGST;
                     document.getElementById('paymentTerms').value = inv.paymentTerms || '30 days';
                     document.getElementById('invoiceNotes').value = inv.invoiceNotes || '';
 
-                    // Populate line items
                     const container = document.getElementById('lineItemsContainer');
                     container.innerHTML = '';
-                    inv.items.forEach((item, index) => {
+                    inv.items.forEach((item) => {
                         const div = document.createElement('div');
                         div.className = 'line-item';
                         div.innerHTML = `
@@ -1829,7 +1775,6 @@
                         });
                     });
 
-                    // Auto-preview
                     const data = buildInvoiceData(inv.invoiceNumber);
                     if (data) renderPreview(data);
 
@@ -1840,7 +1785,6 @@
                 });
             });
 
-            // ---- Duplicate ----
             document.querySelectorAll('.hist-duplicate').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -1849,7 +1793,6 @@
                     const client = getClient(inv.clientId);
                     if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
 
-                    // Populate form with a new temporary number
                     document.getElementById('editingInvoiceId').value = '';
                     document.getElementById('editingInvoiceNumber').value = '';
                     document.getElementById('cancelEditBtn').style.display = 'none';
@@ -1891,7 +1834,6 @@
                 });
             });
 
-            // ---- PDF / PNG from history ----
             document.querySelectorAll('.hist-pdf, .hist-png').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -1919,14 +1861,12 @@
                     renderPreview(data);
                     preview.style.display = 'block';
                     const type = this.classList.contains('hist-pdf') ? 'pdf' : 'png';
-                    // Temporarily set data for generation
                     preview._invoiceData = data;
                     generateFromPreview(type);
                     if (!wasVisible) preview.style.display = 'none';
                 });
             });
 
-            // ---- Delete ----
             document.querySelectorAll('.hist-delete').forEach(btn => {
                 btn.addEventListener('click', function() {
                     if (!confirm('Delete this invoice?')) return;
@@ -2028,14 +1968,12 @@
             populateHistoryFilter();
             renderHistory();
             hideStatus();
-            // Re-apply search filters
             filterClientList();
             filterBusinessList();
         }
 
         renderAll();
-        console.log('🧾 Invoice App ready – all 8 features included!');
-        console.log('✅ Features: Web Share, Edit/Duplicate, Payment Terms, Notes, Search, Total in Words, PDF Margins');
+        console.log('🧾 Invoice App ready – fixed PDF cropping & table alignment.');
     </script>
 </body>
 </html>
