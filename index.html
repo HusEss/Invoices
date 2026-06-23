@@ -2115,42 +2115,36 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE INVOICE (fixes editing flow)
+        // SAVE INVOICE (FIXED: builds fresh data from form)
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
-            const preview = document.getElementById('invoicePreview');
-            if (!preview.style.display || preview.style.display === 'none') {
-                showStatus('Please preview the invoice first.', 'error');
-                return;
-            }
-            let data = preview._invoiceData;
-            if (!data) {
-                showStatus('Invoice data missing. Preview again.', 'error');
-                return;
-            }
-
             const editingId = document.getElementById('editingInvoiceId').value;
 
-            // If editing, remove the old invoice first
+            // If editing, we need to keep the original invoice number
+            let originalNumber = null;
+            let isEditing = false;
             if (editingId) {
                 const existing = appData.invoices.find(inv => inv.id === editingId);
                 if (existing) {
-                    // Keep the original invoice number
-                    data.invoiceNumber = existing.invoiceNumber;
-                    appData.invoices = appData.invoices.filter(inv => inv.id !== editingId);
+                    originalNumber = existing.invoiceNumber;
+                    isEditing = true;
                 }
-                // Clear editing state AFTER removal
-                document.getElementById('editingInvoiceId').value = '';
-                document.getElementById('editingInvoiceNumber').value = '';
-                document.getElementById('cancelEditBtn').style.display = 'none';
-                document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
-                // Update the status message
-                showStatus('Invoice #' + data.invoiceNumber + ' updated successfully.', 'success');
             }
 
-            // If it's still a preview number, consume a real one
-            if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
-                    '-preview'))) {
+            // Build fresh data from the current form
+            const data = buildInvoiceData(originalNumber || null);
+            if (!data) {
+                // buildInvoiceData already shows status messages
+                return;
+            }
+
+            // If we're editing, use the original number
+            if (isEditing && originalNumber) {
+                data.invoiceNumber = originalNumber;
+            }
+
+            // If it's a new invoice (not editing) and still a preview number, consume a real one
+            if (!isEditing && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes('-preview'))) {
                 const clientId = data.clientId || data.client.id;
                 const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
@@ -2158,12 +2152,19 @@
                     return;
                 }
                 data.invoiceNumber = realNumber;
-                renderPreview(data, currentTemplate);
-                data = preview._invoiceData;
             }
 
-            // Duplicate check – only for new invoices (not editing)
-            if (!editingId) {
+            // If editing, remove the old invoice from history
+            if (isEditing) {
+                appData.invoices = appData.invoices.filter(inv => inv.id !== editingId);
+                // Clear editing state
+                document.getElementById('editingInvoiceId').value = '';
+                document.getElementById('editingInvoiceNumber').value = '';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+                document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
+                showStatus('✅ Invoice #' + data.invoiceNumber + ' updated successfully!', 'success');
+            } else {
+                // New invoice – check for duplicates
                 if (appData.invoices.some(inv =>
                         inv.invoiceNumber === data.invoiceNumber &&
                         inv.clientId === data.client.id &&
@@ -2173,8 +2174,10 @@
                     'error');
                     return;
                 }
+                showStatus('✅ Invoice #' + data.invoiceNumber + ' saved!', 'success');
             }
 
+            // Create and save the record
             const record = {
                 id: generateId(),
                 businessId: data.business.id,
@@ -2193,15 +2196,17 @@
             };
             appData.invoices.push(record);
             saveData(appData);
+
             document.getElementById('saveMessage').textContent = '✅ Invoice #' + data.invoiceNumber + ' saved!';
-            if (!editingId) {
-                showStatus('✅ Saved to history!', 'success');
-            }
-            setTimeout(() => { document.getElementById('saveMessage').textContent = '';
-                hideStatus(); }, 3000);
+            setTimeout(() => { document.getElementById('saveMessage').textContent = ''; }, 3000);
+
+            // Re-render preview with the saved data and refresh history
+            renderPreview(data, currentTemplate);
             renderHistory();
+            setTimeout(hideStatus, 3000);
         });
 
+        // Cancel editing
         document.getElementById('cancelEditBtn').addEventListener('click', function() {
             document.getElementById('editingInvoiceId').value = '';
             document.getElementById('editingInvoiceNumber').value = '';
@@ -2326,16 +2331,16 @@
                     const client = getClient(inv.clientId);
                     if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
 
-                    // Set editing state BEFORE switching tab
+                    // Set editing state
                     document.getElementById('editingInvoiceId').value = inv.id;
                     document.getElementById('editingInvoiceNumber').value = inv.invoiceNumber;
                     document.getElementById('cancelEditBtn').style.display = 'inline-block';
                     document.getElementById('saveInvoiceBtn').textContent = '✎ Update Invoice';
 
-                    // Now switch tab (which will NOT clear the state because we set it after)
+                    // Switch tab (but keep state)
                     switchTab('tab-invoice');
 
-                    // Populate the form
+                    // Populate form
                     document.getElementById('invBusiness').value = biz.id;
                     document.getElementById('invClient').value = client.id;
                     document.getElementById('includeGST').checked = inv.includeGST;
@@ -2362,7 +2367,7 @@
                         });
                     });
 
-                    // Preview with original number
+                    // Build fresh data and preview
                     const data = buildInvoiceData(inv.invoiceNumber);
                     if (data) renderPreview(data, currentTemplate);
 
@@ -2468,7 +2473,7 @@
         }
 
         // ============================================================
-        // GENERATE REPORT (for filtered client)
+        // GENERATE REPORT
         // ============================================================
         function generateReport(clientId) {
             const client = getClient(clientId);
@@ -2483,7 +2488,6 @@
             const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total, 0);
             const totalGst = invoices.reduce((sum, inv) => sum + (inv.gst || 0), 0);
 
-            // Build report text
             let reportText = '';
             reportText += 'SUMMARY REPORT\n';
             reportText += ''.padEnd(50, '=') + '\n';
@@ -2509,7 +2513,6 @@
             reportText += ''.padEnd(50, '=') + '\n';
             reportText += 'Report generated: ' + new Date().toLocaleString('en-AU') + '\n';
 
-            // Create a temporary div to render the report for PDF
             const tempDiv = document.createElement('div');
             tempDiv.style.cssText =
                 'position:fixed; top:-9999px; left:-9999px; background:white; padding:40px; font-family:monospace; font-size:14px; line-height:1.8; white-space:pre;';
@@ -2607,7 +2610,7 @@
         });
 
         // ============================================================
-        // TABS – FIX 5: Clear editing state when manually switching to New tab
+        // TABS – preserve editing state
         // ============================================================
         function switchTab(tabId) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2615,26 +2618,21 @@
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 
-            // Only clear editing state if we're switching to the New tab
-            // AND it's NOT already in the middle of an edit flow
-            // We check if the save button text is "✎ Update Invoice" – if so, we keep the state
-            const saveBtn = document.getElementById('saveInvoiceBtn');
-            const isEditing = saveBtn.textContent === '✎ Update Invoice';
-
-            if (tabId === 'tab-invoice' && !isEditing) {
-                document.getElementById('editingInvoiceId').value = '';
-                document.getElementById('editingInvoiceNumber').value = '';
-                document.getElementById('cancelEditBtn').style.display = 'none';
-                document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
-                hideStatus();
+            // Only clear editing state if switching to New tab and not currently editing
+            if (tabId === 'tab-invoice') {
+                const editingId = document.getElementById('editingInvoiceId').value;
+                if (!editingId) {
+                    document.getElementById('editingInvoiceNumber').value = '';
+                    document.getElementById('cancelEditBtn').style.display = 'none';
+                    document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
+                    hideStatus();
+                }
+                // If editing, keep the "✎ Update Invoice" button text – do nothing
             }
 
-            if (tabId === 'tab-history') { populateHistoryFilter();
-                renderHistory(); }
-            if (tabId === 'tab-clients') { renderClientList();
-                filterClientList(); }
-            if (tabId === 'tab-business') { renderBusinessList();
-                filterBusinessList(); }
+            if (tabId === 'tab-history') { populateHistoryFilter(); renderHistory(); }
+            if (tabId === 'tab-clients') { renderClientList(); filterClientList(); }
+            if (tabId === 'tab-business') { renderBusinessList(); filterBusinessList(); }
             if (tabId === 'tab-invoice') { populateDropdowns(); }
         }
 
@@ -2659,10 +2657,12 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – FINAL with 4 distinct templates and logo fix!');
-        console.log('✅ Templates: Classic, Modern, Professional, Compact – all different layouts');
-        console.log('✅ Logo: Top-left, inline with business details');
-        console.log('✅ Edit flow: Fixed – "Update Invoice" button works correctly');
+        console.log('🧾 Invoice App – FINAL VERSION');
+        console.log('✅ Fixed save/update: builds fresh data from form');
+        console.log('✅ Editing state preserved correctly');
+        console.log('✅ 4 distinct templates');
+        console.log('✅ Logo top-left inline');
+        console.log('✅ History totals & report');
         console.log('✅ All previous fixes included');
     </script>
 </body>
