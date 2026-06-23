@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
     </script>
     <style>
-        /* ===== CSS VARIABLES (unchanged) ===== */
+        /* ===== CSS VARIABLES ===== */
         :root {
             --bg-body: #f2f4f8;
             --bg-panel: #ffffff;
@@ -421,7 +421,7 @@
         }
 
         /* ================================================================
-           INVOICE PREVIEW – TEXT-BASED LAYOUT (NO TABLES!)
+           INVOICE TEMPLATES – Shared base styles + template-specific overrides
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -434,8 +434,9 @@
             color: #1a202c;
             width: 100%;
             overflow: hidden;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+        /* --- Shared invoice elements --- */
         #invoicePreview .inv-header {
             display: flex;
             justify-content: space-between;
@@ -443,7 +444,18 @@
             padding-bottom: 14px;
             margin-bottom: 16px;
             flex-wrap: wrap;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            align-items: flex-start;
+        }
+        #invoicePreview .inv-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        #invoicePreview .inv-logo {
+            max-height: 60px;
+            max-width: 120px;
+            object-fit: contain;
+            border-radius: 4px;
         }
         #invoicePreview .inv-title {
             font-size: 26px;
@@ -456,7 +468,6 @@
             font-size: 14px;
             line-height: 1.5;
             color: #4a5568;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .inv-business strong {
             font-size: 16px;
@@ -470,7 +481,6 @@
             margin-bottom: 14px;
             font-size: 13px;
             color: #4a5568;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .inv-meta .left {
             font-weight: 500;
@@ -479,15 +489,13 @@
             margin-bottom: 16px;
             font-size: 14px;
             color: #4a5568;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .bill-to strong {
             display: block;
             font-size: 15px;
             color: #1a202c;
         }
-
-        /* === TEXT TABLE (monospace, fixed-width) === */
+        /* --- Shared table styles --- */
         #invoicePreview .text-table {
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
@@ -501,27 +509,11 @@
             line-height: 1.8;
             color: #1a202c;
         }
-        #invoicePreview .text-table .header {
-            font-weight: 700;
-            border-bottom: 2px solid #2b6cb0;
-            padding-bottom: 4px;
-            margin-bottom: 4px;
-            color: #1a202c;
-        }
-        #invoicePreview .text-table .row {
-            color: #1a202c;
-        }
-        #invoicePreview .text-table .divider {
-            border-bottom: 1px dashed #d1d5db;
-            margin: 4px 0;
-        }
-
         #invoicePreview .totals {
             text-align: right;
             margin-top: 10px;
             padding-top: 12px;
             border-top: 2px solid #e2e8f0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         #invoicePreview .totals div {
             padding: 3px 0;
@@ -547,59 +539,195 @@
             font-size: 12px;
             color: #4a5568;
             white-space: pre-wrap;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* ===== HISTORY ===== */
-        .history-filter {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+        /* --- TEMPLATE 1: CLASSIC (default) --- */
+        #invoicePreview.template-classic .inv-header {
+            border-bottom-color: #2b6cb0;
         }
-        .history-filter label {
-            margin: 0;
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-secondary);
+        #invoicePreview.template-classic .text-table {
+            background: #f9fafb;
+            border: 1px solid #e2e8f0;
         }
-        .history-filter select {
-            flex: 1;
-            min-width: 120px;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 15px;
-            background: var(--bg-input);
-            color: var(--text-primary);
-            border: 1.5px solid var(--border-input);
+
+        /* --- TEMPLATE 2: MODERN (minimal, soft) --- */
+        #invoicePreview.template-modern .inv-header {
+            border-bottom-color: #38a169;
+            border-bottom-width: 2px;
         }
-        .hist-item {
+        #invoicePreview.template-modern .inv-title {
+            color: #38a169;
+        }
+        #invoicePreview.template-modern .text-table {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+        }
+        #invoicePreview.template-modern .totals {
+            border-top-color: #d1d5db;
+        }
+        #invoicePreview.template-modern .totals .grand {
+            color: #38a169;
+        }
+
+        /* --- TEMPLATE 3: PROFESSIONAL (grey header, formal) --- */
+        #invoicePreview.template-professional .inv-header {
+            background: #f1f5f9;
+            padding: 16px 20px;
+            border-radius: 6px 6px 0 0;
+            border-bottom: 2px solid #334155;
+            margin: -28px -24px 16px -24px;
+            padding-left: 24px;
+            padding-right: 24px;
+            border-bottom-color: #334155;
+        }
+        #invoicePreview.template-professional .inv-business strong {
+            color: #0f172a;
+        }
+        #invoicePreview.template-professional .text-table {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+        #invoicePreview.template-professional .totals {
+            border-top-color: #cbd5e1;
+        }
+        #invoicePreview.template-professional .footer-note {
+            border-top-color: #cbd5e1;
+        }
+
+        /* --- TEMPLATE 4: COMPACT (smaller font, tighter spacing) --- */
+        #invoicePreview.template-compact {
+            font-size: 11px;
+            padding: 18px 16px;
+        }
+        #invoicePreview.template-compact .inv-title {
+            font-size: 20px;
+        }
+        #invoicePreview.template-compact .inv-header {
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom-width: 2px;
+        }
+        #invoicePreview.template-compact .text-table {
+            font-size: 11px;
+            padding: 6px 10px;
+            line-height: 1.5;
+        }
+        #invoicePreview.template-compact .totals div {
+            font-size: 12px;
+            padding: 2px 0;
+        }
+        #invoicePreview.template-compact .totals .grand {
+            font-size: 16px;
+        }
+        #invoicePreview.template-compact .footer-note {
+            font-size: 10px;
+            margin-top: 10px;
+            padding-top: 8px;
+        }
+        #invoicePreview.template-compact .bill-to {
+            font-size: 12px;
+        }
+        #invoicePreview.template-compact .bill-to strong {
+            font-size: 13px;
+        }
+
+        /* ===== HISTORY TOTALS ===== */
+        .history-totals {
             background: var(--bg-item);
             border-radius: 14px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-card);
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            border: 1px solid var(--border-card);
         }
-        .hist-item .left .num {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--text-primary);
-        }
-        .hist-item .left {
+        .history-totals .total-item {
+            font-size: 14px;
+            font-weight: 600;
             color: var(--text-secondary);
         }
-        .hist-item .right .btn {
+        .history-totals .total-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: block;
+        }
+        .history-totals .total-item .value.gst {
+            color: var(--accent);
+        }
+        .history-totals .btn {
             width: auto;
-            padding: 6px 14px;
-            font-size: 13px;
             margin-top: 0;
+            padding: 8px 18px;
+            font-size: 14px;
+            flex: 0 1 auto;
         }
 
+        /* ===== TEMPLATE SELECTOR ===== */
+        .template-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 8px 0 4px;
+        }
+        .template-selector .template-option {
+            flex: 1 1 45%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-input);
+            border-radius: 12px;
+            background: var(--bg-input);
+            text-align: center;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            touch-action: manipulation;
+        }
+        .template-selector .template-option:active {
+            transform: scale(0.97);
+        }
+        .template-selector .template-option.active {
+            border-color: var(--accent);
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
+        }
+        .template-selector .template-option .template-preview {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+
+        /* ===== LOGO UPLOAD ===== */
+        .logo-preview {
+            margin-top: 6px;
+            max-height: 60px;
+            max-width: 120px;
+            border: 1px dashed var(--border-input);
+            border-radius: 8px;
+            padding: 4px;
+            background: var(--bg-input);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+        .logo-preview img {
+            max-height: 56px;
+            max-width: 112px;
+            object-fit: contain;
+        }
+        .logo-preview .placeholder {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .tabs .tab-btn {
                 font-size: 12px;
@@ -616,6 +744,10 @@
             #invoicePreview .inv-business {
                 font-size: 12px;
             }
+            #invoicePreview.template-professional .inv-header {
+                margin: -16px -12px 12px -12px;
+                padding: 12px 16px;
+            }
             .line-item input {
                 font-size: 14px;
             }
@@ -628,6 +760,17 @@
             }
             .dark-toggle span {
                 display: none;
+            }
+            .history-totals {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .history-totals .btn {
+                width: 100%;
+            }
+            .template-selector .template-option {
+                flex: 1 1 100%;
             }
         }
     </style>
@@ -694,6 +837,26 @@
 
         <label for="invoiceNotes">Invoice Notes / Footer</label>
         <textarea id="invoiceNotes" placeholder="Thank you for your business!"></textarea>
+
+        <label style="margin-top:12px;">Template</label>
+        <div class="template-selector" id="templateSelector">
+            <div class="template-option active" data-template="classic">
+                <span class="template-preview">📄</span>
+                Classic
+            </div>
+            <div class="template-option" data-template="modern">
+                <span class="template-preview">✨</span>
+                Modern
+            </div>
+            <div class="template-option" data-template="professional">
+                <span class="template-preview">🏛️</span>
+                Professional
+            </div>
+            <div class="template-option" data-template="compact">
+                <span class="template-preview">📐</span>
+                Compact
+            </div>
+        </div>
 
         <button class="btn btn-success" id="previewBtn">🔄 Preview Invoice</button>
 
@@ -763,6 +926,12 @@
         <input type="text" id="bizBsb" placeholder="123-456" maxlength="7" />
         <label>Account Number</label>
         <input type="text" id="bizAccount" placeholder="12345678" maxlength="9" />
+        <label>Logo</label>
+        <input type="file" id="bizLogo" accept="image/*" />
+        <div class="logo-preview" id="logoPreview">
+            <span class="placeholder">No logo uploaded</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="removeLogoBtn" style="display:none;width:auto;margin-top:4px;">Remove Logo</button>
         <div class="flex">
             <button class="btn" id="saveBizBtn">💾 Save Business</button>
             <button class="btn btn-secondary" id="cancelBizBtn" style="display:none;">Cancel</button>
@@ -784,13 +953,17 @@
                 <option value="all">All Clients</option>
             </select>
         </div>
+        <div id="historyTotals" style="display:none;"></div>
         <div id="historyList"></div>
-        <button class="btn btn-danger btn-sm" id="clearHistoryBtn" style="width:auto;margin-top:8px;">🗑️ Clear All</button>
+        <div class="flex" style="margin-top:8px;">
+            <button class="btn btn-secondary btn-sm" id="generateReportBtn" style="flex:0 1 auto;">📄 Generate Report</button>
+            <button class="btn btn-danger btn-sm" id="clearHistoryBtn" style="flex:0 1 auto;">🗑️ Clear All</button>
+        </div>
     </div>
 
     <script>
         // ============================================================
-        // DARK MODE TOGGLE (FIX 6: null check)
+        // DARK MODE TOGGLE
         // ============================================================
         (function initDarkMode() {
             const toggleBtn = document.getElementById('darkToggle');
@@ -835,6 +1008,7 @@
                     if (!data.clients) data.clients = [];
                     if (!data.invoices) data.invoices = [];
                     data.clients.forEach(c => { if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1; });
+                    data.businesses.forEach(b => { if (b.logo === undefined) b.logo = null; });
                     return data;
                 }
             } catch (_) {}
@@ -848,26 +1022,27 @@
         let appData = loadData();
 
         // ============================================================
-        // SEED DEMO DATA
+        // SEED DEMO DATA (COMPLETELY RANDOM – NO PERSONAL INFO)
         // ============================================================
         function seedDemoData() {
             if (appData.businesses.length === 0 && appData.clients.length === 0) {
                 appData.businesses.push({
                     id: 'biz_demo',
-                    name: 'Essale Trading Co',
-                    abn: '34794221475',
-                    address: '123 George St, Sydney NSW 2000',
-                    phone: '0475 050 000',
-                    email: 'info@essale.com.au',
-                    bsb: '062233',
-                    account: '10314687'
+                    name: 'Apex Trading Co',
+                    abn: '98765432109',
+                    address: 'Level 1, 99 Smith Street, Melbourne VIC 3000',
+                    phone: '03 9123 4567',
+                    email: 'info@apextrading.com.au',
+                    bsb: '123456',
+                    account: '78901234',
+                    logo: null
                 });
                 appData.clients.push({
                     id: 'client_demo',
-                    name: 'Sydney Construction Pty Ltd',
-                    abn: '12271867198',
-                    address: '456 Pitt St, Sydney NSW 2000',
-                    email: 'accounts@sydneyconstruction.com.au',
+                    name: 'Melbourne Construction Group Pty Ltd',
+                    abn: '12345678901',
+                    address: '88 Collins Street, Melbourne VIC 3000',
+                    email: 'accounts@melbconstruct.com.au',
                     nextInvoiceNumber: 1
                 });
                 saveData(appData);
@@ -891,7 +1066,6 @@
 
         function getClient(id) { return appData.clients.find(c => c.id === id); }
 
-        // FIX 1 & 7: Non-destructive peek and consume
         function peekNextInvoiceNumber(clientId) {
             const client = getClient(clientId);
             if (!client) return null;
@@ -925,7 +1099,7 @@
 
         function cleanBSB(raw) { return String(raw).replace(/\D/g, ''); }
 
-        // FIX 4: numberToWords with millions support
+        // numberToWords – supports billions
         function numberToWords(n) {
             if (n === 0) return 'Zero dollars';
             const num = Math.round(n * 100) / 100;
@@ -946,6 +1120,8 @@
                     1000) : '');
                 if (num < 1000000000) return toWords(Math.floor(num / 1000000)) + ' Million' + (num % 1000000 ? ' ' +
                     toWords(num % 1000000) : '');
+                if (num < 1000000000000) return toWords(Math.floor(num / 1000000000)) + ' Billion' + (num % 1000000000 ?
+                    ' ' + toWords(num % 1000000000) : '');
                 return '';
             }
 
@@ -961,7 +1137,6 @@
             return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
-        // FIX 8: Sanitise user input
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, '&amp;')
@@ -982,6 +1157,75 @@
             el.style.display = 'none';
             el.className = '';
         }
+
+        // ============================================================
+        // LOGO HANDLING
+        // ============================================================
+        function resizeLogo(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 200;
+                        const MAX_HEIGHT = 200;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height = Math.round(height * (MAX_WIDTH / width));
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width = Math.round(width * (MAX_HEIGHT / height));
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayLogoPreview(dataUrl) {
+            const container = document.getElementById('logoPreview');
+            if (dataUrl && dataUrl.startsWith('data:image')) {
+                container.innerHTML = `<img src="${dataUrl}" alt="Logo" />`;
+                document.getElementById('removeLogoBtn').style.display = 'inline-block';
+            } else {
+                container.innerHTML = '<span class="placeholder">No logo uploaded</span>';
+                document.getElementById('removeLogoBtn').style.display = 'none';
+            }
+        }
+
+        document.getElementById('bizLogo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            resizeLogo(file).then(dataUrl => {
+                displayLogoPreview(dataUrl);
+                // Store temporarily for save
+                document.getElementById('bizLogo').dataset.tempLogo = dataUrl;
+            }).catch(err => {
+                showStatus('Failed to process logo: ' + err.message, 'error');
+            });
+        });
+
+        document.getElementById('removeLogoBtn').addEventListener('click', function() {
+            document.getElementById('logoPreview').innerHTML = '<span class="placeholder">No logo uploaded</span>';
+            document.getElementById('bizLogo').value = '';
+            document.getElementById('bizLogo').dataset.tempLogo = '';
+            document.getElementById('removeLogoBtn').style.display = 'none';
+        });
 
         // ============================================================
         // RENDER: Dropdowns
@@ -1051,7 +1295,7 @@
         }
 
         // ============================================================
-        // RENDER: Business & Client Lists (with sanitisation)
+        // RENDER: Business & Client Lists
         // ============================================================
         function renderBusinessList() {
             const container = document.getElementById('businessList');
@@ -1066,6 +1310,7 @@
                             <span class="badge">ABN ${formatABN(b.abn)}</span>
                             <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(b.address || 'No address')}</div>
                             ${b.bsb || b.account ? `<div style="font-size:12px;color:var(--text-muted);">BSB: ${b.bsb ? formatBSB(b.bsb) : ''} Acc: ${escapeHtml(b.account || '')}</div>` : ''}
+                            ${b.logo ? '<div style="font-size:12px;color:var(--text-muted);">✅ Logo uploaded</div>' : ''}
                         </div>
                         <div>
                             <button class="btn btn-secondary btn-sm edit-biz" data-id="${b.id}">✎</button>
@@ -1110,7 +1355,7 @@
         }
 
         // ============================================================
-        // CRUD: Business (sanitised)
+        // CRUD: Business
         // ============================================================
         function editBusiness(id) {
             const b = getBusiness(id);
@@ -1123,6 +1368,13 @@
             document.getElementById('bizEmail').value = b.email || '';
             document.getElementById('bizBsb').value = b.bsb ? formatBSB(b.bsb) : '';
             document.getElementById('bizAccount').value = b.account || '';
+            if (b.logo) {
+                displayLogoPreview(b.logo);
+                document.getElementById('bizLogo').dataset.tempLogo = b.logo;
+            } else {
+                displayLogoPreview(null);
+                document.getElementById('bizLogo').dataset.tempLogo = '';
+            }
             document.getElementById('cancelBizBtn').style.display = 'inline-block';
             document.getElementById('saveBizBtn').textContent = '✎ Update Business';
             switchTab('tab-business');
@@ -1155,6 +1407,8 @@
                 return;
             }
 
+            const logoData = document.getElementById('bizLogo').dataset.tempLogo || null;
+
             const payload = {
                 name,
                 abn: clean,
@@ -1162,7 +1416,8 @@
                 phone: document.getElementById('bizPhone').value.trim(),
                 email: document.getElementById('bizEmail').value.trim(),
                 bsb: cleanBsb,
-                account: cleanAccount
+                account: cleanAccount,
+                logo: logoData
             };
 
             if (editId) {
@@ -1190,6 +1445,9 @@
             document.getElementById('bizEmail').value = '';
             document.getElementById('bizBsb').value = '';
             document.getElementById('bizAccount').value = '';
+            document.getElementById('bizLogo').value = '';
+            document.getElementById('bizLogo').dataset.tempLogo = '';
+            displayLogoPreview(null);
             document.getElementById('cancelBizBtn').style.display = 'none';
             document.getElementById('saveBizBtn').textContent = '💾 Save Business';
             hideStatus();
@@ -1211,7 +1469,7 @@
         });
 
         // ============================================================
-        // CRUD: Client (sanitised)
+        // CRUD: Client
         // ============================================================
         function editClient(id) {
             const c = getClient(id);
@@ -1306,7 +1564,7 @@
         });
 
         // ============================================================
-        // LINE ITEMS – FIX 2: proper validation
+        // LINE ITEMS
         // ============================================================
         document.getElementById('addLineItem').addEventListener('click', function() {
             const container = document.getElementById('lineItemsContainer');
@@ -1336,7 +1594,6 @@
             });
         });
 
-        // FIX 2: Validate line items properly
         function getLineItems() {
             const items = [];
             let hasError = false;
@@ -1361,7 +1618,25 @@
         }
 
         // ============================================================
-        // BUILD INVOICE DATA (uses peek for preview, consume for save)
+        // TEMPLATE SELECTOR
+        // ============================================================
+        let currentTemplate = 'classic';
+
+        document.querySelectorAll('.template-option').forEach(el => {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('.template-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                currentTemplate = this.dataset.template;
+                // If preview is already showing, re-render it with new template
+                const preview = document.getElementById('invoicePreview');
+                if (preview.style.display !== 'none' && preview._invoiceData) {
+                    renderPreview(preview._invoiceData, currentTemplate);
+                }
+            });
+        });
+
+        // ============================================================
+        // BUILD INVOICE DATA
         // ============================================================
         function buildInvoiceData(invoiceNumber) {
             const bizId = document.getElementById('invBusiness').value;
@@ -1408,23 +1683,25 @@
                 paymentTerms,
                 bankDetails: bankStr,
                 invoiceNotes,
-                totalWords: numberToWords(total)
+                totalWords: numberToWords(total),
+                clientId: client.id // Store client ID for consumption
             };
         }
 
         // ============================================================
-        // RENDER PREVIEW – TEXT-BASED LAYOUT (FIX 5: date range wrap)
+        // RENDER PREVIEW – 4 TEMPLATES
         // ============================================================
-        function renderPreview(data) {
+        function renderPreview(data, template) {
             const container = document.getElementById('invoicePreview');
             if (!data) { container.style.display = 'none'; return; }
+            const tmpl = template || currentTemplate;
 
             const { business, client, items, subtotal, gst, total, includeGST, invoiceNumber, date, paymentTerms,
                 bankDetails, invoiceNotes, totalWords } = data;
 
             const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
 
-            // Build text-based table
+            // Build text table
             const colDesc = 30;
             const colQty = 8;
             const colRate = 10;
@@ -1434,7 +1711,6 @@
             tableText += 'DESCRIPTION'.padEnd(colDesc) + 'QTY/HRS'.padEnd(colQty) + 'RATE'.padEnd(colRate) + 'AMOUNT\n';
             tableText += ''.padEnd(colDesc + colQty + colRate + colAmount, '-') + '\n';
 
-            // Rows
             items.forEach(i => {
                 let dateRange = '';
                 if (i.start || i.end) {
@@ -1442,38 +1718,33 @@
                     const e = i.end ? formatDate(i.end) : '';
                     dateRange = (s || e) ? (s && e ? s + ' – ' + e : s || e) : '';
                 }
-
-                // FIX 5: show date range on second line if description is long
                 let descLine = i.description;
-                let dateLine = dateRange ? '    ' + dateRange : '';
-
-                // Truncate description if too long
                 if (descLine.length > colDesc) {
                     descLine = descLine.slice(0, colDesc - 3) + '...';
                 }
                 const paddedDesc = descLine.padEnd(colDesc);
-
                 const qtyStr = String(i.hours).padEnd(colQty);
                 const rateStr = formatCurrency(i.rate).padEnd(colRate);
                 const amountStr = formatCurrency(i.amount).padEnd(colAmount);
 
                 tableText += paddedDesc + qtyStr + rateStr + amountStr + '\n';
-
-                // If we have a date range, add it on the next line indented
-                if (dateLine) {
-                    // Limit dateLine length to fit within the table width
+                if (dateRange) {
+                    const dateLine = '    ' + dateRange;
                     const maxDateLen = colDesc + colQty + colRate + colAmount - 4;
-                    if (dateLine.length > maxDateLen) {
-                        dateLine = dateLine.slice(0, maxDateLen - 3) + '...';
-                    }
-                    tableText += dateLine.padEnd(colDesc + colQty + colRate + colAmount) + '\n';
+                    const truncated = dateLine.length > maxDateLen ? dateLine.slice(0, maxDateLen - 3) + '...' : dateLine;
+                    tableText += truncated.padEnd(colDesc + colQty + colRate + colAmount) + '\n';
                 }
             });
 
-            // Build the invoice HTML with sanitisation
+            // Build logo HTML
+            const logoHtml = business.logo ? `<img src="${business.logo}" alt="Logo" class="inv-logo" />` : '';
+
+            // Build invoice HTML with template class
+            container.className = 'template-' + tmpl;
             container.innerHTML = `
                     <div class="inv-header">
-                        <div>
+                        <div class="inv-left">
+                            ${logoHtml}
                             <div class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</div>
                         </div>
                         <div class="inv-business">
@@ -1495,10 +1766,7 @@
                         ${escapeHtml(client.address || '')}<br />
                         ${escapeHtml(client.email || '')}
                     </div>
-
-                    <!-- TEXT TABLE -->
                     <div class="text-table">${escapeHtml(tableText)}</div>
-
                     <div class="totals">
                         <div>Subtotal: ${formatCurrency(subtotal)}</div>
                         <div>${escapeHtml(gstLabel)}: ${formatCurrency(gst)}</div>
@@ -1517,7 +1785,7 @@
         }
 
         // ============================================================
-        // PREVIEW BUTTON (uses peek, does NOT consume)
+        // PREVIEW BUTTON
         // ============================================================
         document.getElementById('previewBtn').addEventListener('click', function() {
             const clientId = document.getElementById('invClient').value;
@@ -1528,7 +1796,7 @@
             }
             const data = buildInvoiceData(previewNumber);
             if (data) {
-                renderPreview(data);
+                renderPreview(data, currentTemplate);
                 document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
@@ -1629,16 +1897,17 @@
                 return;
             }
 
-            // Assign real number (consume) if it's a preview
-            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
-                const clientId = data.client.id;
+            // FIX A: Check for both PREVIEW- and -preview
+            if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
+                    '-preview'))) {
+                const clientId = data.clientId || data.client.id;
                 const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
                 }
                 data.invoiceNumber = realNumber;
-                renderPreview(data);
+                renderPreview(data, currentTemplate);
                 data = preview._invoiceData;
             }
 
@@ -1670,7 +1939,7 @@
         document.getElementById('shareBtn').addEventListener('click', shareInvoice);
 
         // ============================================================
-        // GENERATE PDF & PNG (consume number when needed)
+        // GENERATE PDF & PNG
         // ============================================================
         function generateFromPreview(type) {
             const preview = document.getElementById('invoicePreview');
@@ -1685,16 +1954,17 @@
                 return;
             }
 
-            // Assign real number (consume) if it's a preview
-            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
-                const clientId = data.client.id;
+            // FIX A: Check for both PREVIEW- and -preview
+            if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
+                    '-preview'))) {
+                const clientId = data.clientId || data.client.id;
                 const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
                 }
                 data.invoiceNumber = realNumber;
-                renderPreview(data);
+                renderPreview(data, currentTemplate);
                 data = preview._invoiceData;
             }
 
@@ -1727,7 +1997,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE INVOICE (consume number, tight duplicate check)
+        // SAVE INVOICE
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const preview = document.getElementById('invoicePreview');
@@ -1756,16 +2026,17 @@
                 document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
             }
 
-            // Consume real number if preview
-            if (data.invoiceNumber && data.invoiceNumber.includes('PREVIEW-')) {
-                const clientId = data.client.id;
+            // FIX A: Check for both PREVIEW- and -preview
+            if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
+                    '-preview'))) {
+                const clientId = data.clientId || data.client.id;
                 const realNumber = consumeNextInvoiceNumber(clientId);
                 if (!realNumber) {
                     showStatus('Could not generate invoice number.', 'error');
                     return;
                 }
                 data.invoiceNumber = realNumber;
-                renderPreview(data);
+                renderPreview(data, currentTemplate);
                 data = preview._invoiceData;
             }
 
@@ -1814,7 +2085,7 @@
         });
 
         // ============================================================
-        // HISTORY (sanitised)
+        // HISTORY – with totals + report
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
@@ -1823,6 +2094,42 @@
             let filtered = appData.invoices;
             if (filterVal !== 'all') {
                 filtered = filtered.filter(inv => inv.clientId === filterVal);
+            }
+
+            // Calculate totals
+            const totalInvoiced = filtered.reduce((sum, inv) => sum + inv.total, 0);
+            const totalGst = filtered.reduce((sum, inv) => sum + (inv.gst || 0), 0);
+            const totalCount = filtered.length;
+
+            const totalsContainer = document.getElementById('historyTotals');
+            if (filterVal !== 'all' && filtered.length > 0) {
+                const client = getClient(filterVal);
+                const clientName = client ? client.name : 'Selected Client';
+                totalsContainer.style.display = 'flex';
+                totalsContainer.innerHTML = `
+                        <div class="history-totals">
+                            <div>
+                                <div class="total-item">
+                                    ${escapeHtml(clientName)}
+                                    <span class="value">${totalCount} invoice${totalCount > 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div class="total-item">
+                                Total Invoiced
+                                <span class="value">${formatCurrency(totalInvoiced)}</span>
+                            </div>
+                            <div class="total-item">
+                                Total GST
+                                <span class="value gst">${formatCurrency(totalGst)}</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" id="reportBtn">📄 Report</button>
+                        </div>
+                    `;
+                document.getElementById('reportBtn').addEventListener('click', function() {
+                    generateReport(filterVal);
+                });
+            } else {
+                totalsContainer.style.display = 'none';
             }
 
             if (filtered.length === 0) {
@@ -1875,9 +2182,10 @@
                         paymentTerms: inv.paymentTerms || '30 days',
                         bankDetails: inv.bankDetails || '',
                         invoiceNotes: inv.invoiceNotes || '',
-                        totalWords: inv.totalWords || ''
+                        totalWords: inv.totalWords || '',
+                        clientId: client.id
                     };
-                    renderPreview(data);
+                    renderPreview(data, currentTemplate);
                     switchTab('tab-invoice');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
@@ -1923,7 +2231,7 @@
                     });
 
                     const data = buildInvoiceData(inv.invoiceNumber);
-                    if (data) renderPreview(data);
+                    if (data) renderPreview(data, currentTemplate);
 
                     switchTab('tab-invoice');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1972,7 +2280,7 @@
                     });
 
                     const data = buildInvoiceData(getTempInvoiceNumber());
-                    if (data) renderPreview(data);
+                    if (data) renderPreview(data, currentTemplate);
 
                     switchTab('tab-invoice');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2001,11 +2309,12 @@
                         paymentTerms: inv.paymentTerms || '30 days',
                         bankDetails: inv.bankDetails || '',
                         invoiceNotes: inv.invoiceNotes || '',
-                        totalWords: inv.totalWords || ''
+                        totalWords: inv.totalWords || '',
+                        clientId: client.id
                     };
                     const preview = document.getElementById('invoicePreview');
                     const wasVisible = preview.style.display !== 'none';
-                    renderPreview(data);
+                    renderPreview(data, currentTemplate);
                     preview.style.display = 'block';
                     const type = this.classList.contains('hist-pdf') ? 'pdf' : 'png';
                     preview._invoiceData = data;
@@ -2023,6 +2332,89 @@
                     showStatus('🗑️ Deleted.', 'success');
                     setTimeout(hideStatus, 2000);
                 });
+            });
+        }
+
+        // ============================================================
+        // GENERATE REPORT (for filtered client)
+        // ============================================================
+        function generateReport(clientId) {
+            const client = getClient(clientId);
+            if (!client) { showStatus('Client not found.', 'error'); return; }
+
+            const invoices = appData.invoices.filter(inv => inv.clientId === clientId);
+            if (invoices.length === 0) {
+                showStatus('No invoices for this client.', 'error');
+                return;
+            }
+
+            const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total, 0);
+            const totalGst = invoices.reduce((sum, inv) => sum + (inv.gst || 0), 0);
+
+            // Build report text
+            let reportText = '';
+            reportText += 'SUMMARY REPORT\n';
+            reportText += ''.padEnd(50, '=') + '\n';
+            reportText += 'Client: ' + client.name + '\n';
+            reportText += 'ABN: ' + (client.abn ? formatABN(client.abn) : 'N/A') + '\n';
+            reportText += 'Address: ' + (client.address || 'N/A') + '\n';
+            reportText += ''.padEnd(50, '-') + '\n';
+            reportText += 'Total Invoices: ' + invoices.length + '\n';
+            reportText += 'Total Invoiced: ' + formatCurrency(totalInvoiced) + '\n';
+            reportText += 'Total GST: ' + formatCurrency(totalGst) + '\n';
+            reportText += ''.padEnd(50, '=') + '\n\n';
+            reportText += 'INVOICE DETAILS\n';
+            reportText += ''.padEnd(50, '-') + '\n';
+
+            const sorted = [...invoices].reverse();
+            sorted.forEach(inv => {
+                const biz = getBusiness(inv.businessId);
+                const bizName = biz ? biz.name : '❌ Deleted';
+                reportText += inv.invoiceNumber + ' | ' + formatDate(inv.date) + ' | ' + bizName + ' | ' + formatCurrency(
+                    inv.total) + '\n';
+            });
+
+            reportText += ''.padEnd(50, '=') + '\n';
+            reportText += 'Report generated: ' + new Date().toLocaleString('en-AU') + '\n';
+
+            // Create a temporary div to render the report for PDF
+            const tempDiv = document.createElement('div');
+            tempDiv.style.cssText =
+                'position:fixed; top:-9999px; left:-9999px; background:white; padding:40px; font-family:monospace; font-size:14px; line-height:1.8; white-space:pre;';
+            tempDiv.textContent = reportText;
+            document.body.appendChild(tempDiv);
+
+            html2canvas(tempDiv, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                width: tempDiv.scrollWidth,
+                height: tempDiv.scrollHeight
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = 210;
+                const margin = 10;
+                const maxWidth = pageWidth - 2 * margin;
+                const maxHeight = 297 - 2 * margin;
+                let imgWidth = maxWidth;
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                if (imgHeight > maxHeight) {
+                    imgHeight = maxHeight;
+                    imgWidth = (canvas.width * imgHeight) / canvas.height;
+                }
+                const xOffset = (pageWidth - imgWidth) / 2;
+                const yOffset = (297 - imgHeight) / 2;
+                doc.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+                doc.save('report-' + client.name.replace(/\s/g, '_') + '.pdf');
+                document.body.removeChild(tempDiv);
+                showStatus('✅ Report downloaded!', 'success');
+                setTimeout(hideStatus, 3000);
+            }).catch(err => {
+                document.body.removeChild(tempDiv);
+                showStatus('Report generation failed: ' + err.message, 'error');
             });
         }
 
@@ -2069,6 +2461,7 @@
                     if (!confirm('This will replace ALL current data. Continue?')) return;
                     appData = imported;
                     appData.clients.forEach(c => { if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1; });
+                    appData.businesses.forEach(b => { if (b.logo === undefined) b.logo = null; });
                     saveData(appData);
                     renderAll();
                     showStatus('Data imported!', 'success');
@@ -2082,21 +2475,30 @@
         });
 
         // ============================================================
-        // TABS
+        // TABS – FIX 5: Clear editing state when switching to New tab
         // ============================================================
         function switchTab(tabId) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+
+            // FIX 5: Clear editing state when switching to New tab
+            if (tabId === 'tab-invoice') {
+                document.getElementById('editingInvoiceId').value = '';
+                document.getElementById('editingInvoiceNumber').value = '';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+                document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
+                hideStatus();
+            }
+
             if (tabId === 'tab-history') { populateHistoryFilter();
                 renderHistory(); }
             if (tabId === 'tab-clients') { renderClientList();
                 filterClientList(); }
             if (tabId === 'tab-business') { renderBusinessList();
                 filterBusinessList(); }
-            if (tabId === 'tab-invoice') { populateDropdowns();
-                hideStatus(); }
+            if (tabId === 'tab-invoice') { populateDropdowns(); }
         }
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -2120,14 +2522,21 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – All fixes applied!');
-        console.log('✅ F1: Invoice numbers reserved only on save/share/export');
-        console.log('✅ F2: Line item validation fixed');
-        console.log('✅ F3: Tight duplicate check');
-        console.log('✅ F4: numberToWords supports millions');
-        console.log('✅ F5: Date ranges wrap to second line');
-        console.log('✅ F6: Dark mode null check');
-        console.log('✅ F8: All user input sanitised');
+        console.log('🧾 Invoice App – FINAL VERSION with all fixes and features!');
+        console.log('✅ FIX 1: -preview suffix handled correctly');
+        console.log('✅ FIX 2: Line item validation fixed');
+        console.log('✅ FIX 3: Tight duplicate check');
+        console.log('✅ FIX 4: numberToWords supports billions');
+        console.log('✅ FIX 5: Editing state cleared on tab switch');
+        console.log('✅ FIX 6: Dark mode null check');
+        console.log('✅ FIX 7: Client ID stored in preview data');
+        console.log('✅ FIX 8: All user input sanitised');
+        console.log('✅ NEW: 4 templates (Classic, Modern, Professional, Compact)');
+        console.log('✅ NEW: Logo upload for each business');
+        console.log('✅ NEW: Client history totals (invoiced + GST)');
+        console.log('✅ NEW: Client summary report (PDF)');
+        console.log('✅ NEW: Mobile-friendly UI/UX');
+        console.log('✅ DEMO: Apex Trading Co (business) + Melbourne Construction Group (client)');
     </script>
 </body>
 </html>
