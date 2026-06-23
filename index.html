@@ -421,7 +421,7 @@
         }
 
         /* ================================================================
-           INVOICE TEMPLATES – Shared base styles + template-specific overrides
+           INVOICE TEMPLATES – 4 COMPLETELY DIFFERENT LAYOUTS
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -436,57 +436,72 @@
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+
         /* --- Shared invoice elements --- */
         #invoicePreview .inv-header {
             display: flex;
-            justify-content: space-between;
-            border-bottom: 3px solid #2b6cb0;
-            padding-bottom: 14px;
-            margin-bottom: 16px;
             flex-wrap: wrap;
             align-items: flex-start;
+            margin-bottom: 16px;
         }
-        #invoicePreview .inv-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+        #invoicePreview .inv-logo-wrap {
+            flex: 0 0 auto;
+            margin-right: 16px;
+            max-width: 120px;
         }
         #invoicePreview .inv-logo {
             max-height: 60px;
-            max-width: 120px;
+            max-width: 100%;
             object-fit: contain;
+            display: block;
             border-radius: 4px;
         }
-        #invoicePreview .inv-title {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: #1a202c;
-        }
-        #invoicePreview .inv-business {
-            text-align: right;
-            font-size: 14px;
+        #invoicePreview .inv-business-details {
+            flex: 1;
+            font-size: 13px;
             line-height: 1.5;
             color: #4a5568;
         }
-        #invoicePreview .inv-business strong {
+        #invoicePreview .inv-business-details strong {
             font-size: 16px;
             display: block;
             color: #1a202c;
+        }
+        #invoicePreview .inv-title-wrap {
+            width: 100%;
+            text-align: center;
+            margin-top: 12px;
+        }
+        #invoicePreview .inv-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #1a202c;
+        }
+        #invoicePreview .inv-title-small {
+            font-size: 14px;
+            font-weight: 400;
+            color: #4a5568;
+            display: block;
         }
         #invoicePreview .inv-meta {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            margin-bottom: 14px;
+            margin: 8px 0 14px;
             font-size: 13px;
             color: #4a5568;
+            padding: 6px 0;
+            border-bottom: 1px solid #edf2f7;
         }
         #invoicePreview .inv-meta .left {
             font-weight: 500;
         }
+        #invoicePreview .inv-meta .right {
+            text-align: right;
+        }
         #invoicePreview .bill-to {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             font-size: 14px;
             color: #4a5568;
         }
@@ -501,7 +516,7 @@
             font-size: 13px;
             background: #f9fafb;
             padding: 10px 12px;
-            border-radius: 6px;
+            border-radius: 4px;
             margin: 10px 0 16px;
             border: 1px solid #e2e8f0;
             white-space: pre-wrap;
@@ -541,96 +556,190 @@
             white-space: pre-wrap;
         }
 
-        /* --- TEMPLATE 1: CLASSIC (default) --- */
+        /* ================================================================
+           TEMPLATE 1: CLASSIC – Traditional, bordered, centred
+           ================================================================ */
         #invoicePreview.template-classic .inv-header {
-            border-bottom-color: #2b6cb0;
+            border-bottom: 3px solid #2b6cb0;
+            padding-bottom: 14px;
+        }
+        #invoicePreview.template-classic .inv-title {
+            color: #1a202c;
+            font-size: 24px;
         }
         #invoicePreview.template-classic .text-table {
             background: #f9fafb;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #d1d5db;
+        }
+        #invoicePreview.template-classic .totals {
+            border-top-color: #2b6cb0;
         }
 
-        /* --- TEMPLATE 2: MODERN (minimal, soft) --- */
+        /* ================================================================
+           TEMPLATE 2: MODERN – Banner, no borders, colour highlight
+           ================================================================ */
         #invoicePreview.template-modern .inv-header {
-            border-bottom-color: #38a169;
-            border-bottom-width: 2px;
+            border-bottom: none;
+            padding-bottom: 0;
+            background: #f0fdf4;
+            margin: -28px -24px 16px -24px;
+            padding: 20px 24px 16px 24px;
+            border-radius: 0;
+        }
+        #invoicePreview.template-modern .inv-title-wrap {
+            background: #065f46;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-top: 8px;
+            width: auto;
+            display: inline-block;
         }
         #invoicePreview.template-modern .inv-title {
-            color: #38a169;
+            color: white;
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+        #invoicePreview.template-modern .inv-title-small {
+            color: #d1d5db;
         }
         #invoicePreview.template-modern .text-table {
             background: #ffffff;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
+            border: none;
+            border-radius: 0;
+            padding: 8px 4px;
+            border-bottom: 2px solid #d1d5db;
         }
         #invoicePreview.template-modern .totals {
-            border-top-color: #d1d5db;
+            border-top: 2px solid #d1d5db;
+            background: #f0fdf4;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-top: 10px;
         }
         #invoicePreview.template-modern .totals .grand {
-            color: #38a169;
+            color: #065f46;
+        }
+        #invoicePreview.template-modern .footer-note {
+            border-top-color: #d1d5db;
         }
 
-        /* --- TEMPLATE 3: PROFESSIONAL (grey header, formal) --- */
+        /* ================================================================
+           TEMPLATE 3: PROFESSIONAL – Formal letterhead, two-column grid
+           ================================================================ */
         #invoicePreview.template-professional .inv-header {
-            background: #f1f5f9;
-            padding: 16px 20px;
-            border-radius: 6px 6px 0 0;
-            border-bottom: 2px solid #334155;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            background: #f8fafc;
             margin: -28px -24px 16px -24px;
-            padding-left: 24px;
-            padding-right: 24px;
-            border-bottom-color: #334155;
+            padding: 20px 24px 16px 24px;
+            border-bottom: 2px solid #1e293b;
         }
-        #invoicePreview.template-professional .inv-business strong {
+        #invoicePreview.template-professional .inv-business-details strong {
             color: #0f172a;
         }
-        #invoicePreview.template-professional .text-table {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
+        #invoicePreview.template-professional .inv-title {
+            color: #0f172a;
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        #invoicePreview.template-professional .inv-meta {
+            background: #f1f5f9;
+            padding: 10px 14px;
             border-radius: 4px;
+            border-bottom: none;
+            margin: 6px 0 14px;
+        }
+        #invoicePreview.template-professional .bill-to {
+            background: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 4px;
+            border-left: 4px solid #1e293b;
+        }
+        #invoicePreview.template-professional .text-table {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 0;
         }
         #invoicePreview.template-professional .totals {
             border-top-color: #cbd5e1;
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 4px;
         }
         #invoicePreview.template-professional .footer-note {
             border-top-color: #cbd5e1;
         }
 
-        /* --- TEMPLATE 4: COMPACT (smaller font, tighter spacing) --- */
+        /* ================================================================
+           TEMPLATE 4: COMPACT – Tight, minimal, single-page friendly
+           ================================================================ */
         #invoicePreview.template-compact {
+            padding: 16px 14px;
             font-size: 11px;
-            padding: 18px 16px;
-        }
-        #invoicePreview.template-compact .inv-title {
-            font-size: 20px;
+            line-height: 1.5;
         }
         #invoicePreview.template-compact .inv-header {
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            border-bottom-width: 2px;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        #invoicePreview.template-compact .inv-business-details strong {
+            font-size: 14px;
+        }
+        #invoicePreview.template-compact .inv-business-details {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        #invoicePreview.template-compact .inv-logo {
+            max-height: 40px;
+        }
+        #invoicePreview.template-compact .inv-title {
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+        #invoicePreview.template-compact .inv-title-small {
+            font-size: 11px;
+        }
+        #invoicePreview.template-compact .inv-meta {
+            font-size: 11px;
+            margin: 4px 0 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        #invoicePreview.template-compact .bill-to {
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+        #invoicePreview.template-compact .bill-to strong {
+            font-size: 12px;
         }
         #invoicePreview.template-compact .text-table {
             font-size: 11px;
-            padding: 6px 10px;
-            line-height: 1.5;
+            padding: 6px 8px;
+            line-height: 1.4;
+            margin: 6px 0 10px;
+            border: 1px solid #e2e8f0;
+        }
+        #invoicePreview.template-compact .totals {
+            margin-top: 6px;
+            padding-top: 8px;
+            border-top: 1px solid #d1d5db;
         }
         #invoicePreview.template-compact .totals div {
             font-size: 12px;
             padding: 2px 0;
         }
         #invoicePreview.template-compact .totals .grand {
-            font-size: 16px;
+            font-size: 15px;
         }
         #invoicePreview.template-compact .footer-note {
             font-size: 10px;
             margin-top: 10px;
             padding-top: 8px;
-        }
-        #invoicePreview.template-compact .bill-to {
-            font-size: 12px;
-        }
-        #invoicePreview.template-compact .bill-to strong {
-            font-size: 13px;
+            border-top: 1px solid #e2e8f0;
         }
 
         /* ===== HISTORY TOTALS ===== */
@@ -739,10 +848,14 @@
                 font-size: 12px;
             }
             #invoicePreview .inv-title {
-                font-size: 22px;
+                font-size: 20px;
             }
             #invoicePreview .inv-business {
                 font-size: 12px;
+            }
+            #invoicePreview.template-modern .inv-header {
+                margin: -16px -12px 12px -12px;
+                padding: 12px 16px;
             }
             #invoicePreview.template-professional .inv-header {
                 margin: -16px -12px 12px -12px;
@@ -771,6 +884,13 @@
             }
             .template-selector .template-option {
                 flex: 1 1 100%;
+            }
+            #invoicePreview .inv-logo {
+                max-height: 40px;
+            }
+            #invoicePreview .inv-logo-wrap {
+                max-width: 80px;
+                margin-right: 10px;
             }
         }
     </style>
@@ -1022,7 +1142,7 @@
         let appData = loadData();
 
         // ============================================================
-        // SEED DEMO DATA (COMPLETELY RANDOM – NO PERSONAL INFO)
+        // SEED DEMO DATA
         // ============================================================
         function seedDemoData() {
             if (appData.businesses.length === 0 && appData.clients.length === 0) {
@@ -1099,7 +1219,6 @@
 
         function cleanBSB(raw) { return String(raw).replace(/\D/g, ''); }
 
-        // numberToWords – supports billions
         function numberToWords(n) {
             if (n === 0) return 'Zero dollars';
             const num = Math.round(n * 100) / 100;
@@ -1213,7 +1332,6 @@
             if (!file) return;
             resizeLogo(file).then(dataUrl => {
                 displayLogoPreview(dataUrl);
-                // Store temporarily for save
                 document.getElementById('bizLogo').dataset.tempLogo = dataUrl;
             }).catch(err => {
                 showStatus('Failed to process logo: ' + err.message, 'error');
@@ -1627,7 +1745,6 @@
                 document.querySelectorAll('.template-option').forEach(opt => opt.classList.remove('active'));
                 this.classList.add('active');
                 currentTemplate = this.dataset.template;
-                // If preview is already showing, re-render it with new template
                 const preview = document.getElementById('invoicePreview');
                 if (preview.style.display !== 'none' && preview._invoiceData) {
                     renderPreview(preview._invoiceData, currentTemplate);
@@ -1684,12 +1801,12 @@
                 bankDetails: bankStr,
                 invoiceNotes,
                 totalWords: numberToWords(total),
-                clientId: client.id // Store client ID for consumption
+                clientId: client.id
             };
         }
 
         // ============================================================
-        // RENDER PREVIEW – 4 TEMPLATES
+        // RENDER PREVIEW – 4 TEMPLATES (Logo top-left, inline details)
         // ============================================================
         function renderPreview(data, template) {
             const container = document.getElementById('invoicePreview');
@@ -1743,16 +1860,19 @@
             container.className = 'template-' + tmpl;
             container.innerHTML = `
                     <div class="inv-header">
-                        <div class="inv-left">
+                        <div class="inv-logo-wrap">
                             ${logoHtml}
-                            <div class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</div>
                         </div>
-                        <div class="inv-business">
+                        <div class="inv-business-details">
                             <strong>${escapeHtml(business.name)}</strong>
                             ${business.abn ? 'ABN: ' + formatABN(business.abn) : ''}<br />
                             ${escapeHtml(business.address || '')}<br />
                             ${escapeHtml(business.phone || '')}<br />
                             ${escapeHtml(business.email || '')}
+                        </div>
+                        <div class="inv-title-wrap">
+                            <span class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</span>
+                            <span class="inv-title-small"># ${escapeHtml(invoiceNumber)}</span>
                         </div>
                     </div>
                     <div class="inv-meta">
@@ -1897,7 +2017,6 @@
                 return;
             }
 
-            // FIX A: Check for both PREVIEW- and -preview
             if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
                     '-preview'))) {
                 const clientId = data.clientId || data.client.id;
@@ -1954,7 +2073,6 @@
                 return;
             }
 
-            // FIX A: Check for both PREVIEW- and -preview
             if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
                     '-preview'))) {
                 const clientId = data.clientId || data.client.id;
@@ -1997,7 +2115,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE INVOICE
+        // SAVE INVOICE (fixes editing flow)
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const preview = document.getElementById('invoicePreview');
@@ -2013,20 +2131,24 @@
 
             const editingId = document.getElementById('editingInvoiceId').value;
 
-            // If editing, remove old invoice first
+            // If editing, remove the old invoice first
             if (editingId) {
                 const existing = appData.invoices.find(inv => inv.id === editingId);
                 if (existing) {
+                    // Keep the original invoice number
                     data.invoiceNumber = existing.invoiceNumber;
                     appData.invoices = appData.invoices.filter(inv => inv.id !== editingId);
                 }
+                // Clear editing state AFTER removal
                 document.getElementById('editingInvoiceId').value = '';
                 document.getElementById('editingInvoiceNumber').value = '';
                 document.getElementById('cancelEditBtn').style.display = 'none';
                 document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
+                // Update the status message
+                showStatus('Invoice #' + data.invoiceNumber + ' updated successfully.', 'success');
             }
 
-            // FIX A: Check for both PREVIEW- and -preview
+            // If it's still a preview number, consume a real one
             if (data.invoiceNumber && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes(
                     '-preview'))) {
                 const clientId = data.clientId || data.client.id;
@@ -2040,14 +2162,17 @@
                 data = preview._invoiceData;
             }
 
-            // FIX 3: Tight duplicate check (business + client + invoice number)
-            if (appData.invoices.some(inv =>
-                    inv.invoiceNumber === data.invoiceNumber &&
-                    inv.clientId === data.client.id &&
-                    inv.businessId === data.business.id
-                )) {
-                showStatus('Invoice #' + data.invoiceNumber + ' already exists for this client and business.', 'error');
-                return;
+            // Duplicate check – only for new invoices (not editing)
+            if (!editingId) {
+                if (appData.invoices.some(inv =>
+                        inv.invoiceNumber === data.invoiceNumber &&
+                        inv.clientId === data.client.id &&
+                        inv.businessId === data.business.id
+                    )) {
+                    showStatus('Invoice #' + data.invoiceNumber + ' already exists for this client and business.',
+                    'error');
+                    return;
+                }
             }
 
             const record = {
@@ -2069,7 +2194,9 @@
             appData.invoices.push(record);
             saveData(appData);
             document.getElementById('saveMessage').textContent = '✅ Invoice #' + data.invoiceNumber + ' saved!';
-            showStatus('✅ Saved to history!', 'success');
+            if (!editingId) {
+                showStatus('✅ Saved to history!', 'success');
+            }
             setTimeout(() => { document.getElementById('saveMessage').textContent = '';
                 hideStatus(); }, 3000);
             renderHistory();
@@ -2161,7 +2288,7 @@
                     `;
             }).join('');
 
-            // Event listeners (unchanged)
+            // Event listeners
             document.querySelectorAll('.hist-view').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -2199,11 +2326,16 @@
                     const client = getClient(inv.clientId);
                     if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
 
+                    // Set editing state BEFORE switching tab
                     document.getElementById('editingInvoiceId').value = inv.id;
                     document.getElementById('editingInvoiceNumber').value = inv.invoiceNumber;
                     document.getElementById('cancelEditBtn').style.display = 'inline-block';
                     document.getElementById('saveInvoiceBtn').textContent = '✎ Update Invoice';
 
+                    // Now switch tab (which will NOT clear the state because we set it after)
+                    switchTab('tab-invoice');
+
+                    // Populate the form
                     document.getElementById('invBusiness').value = biz.id;
                     document.getElementById('invClient').value = client.id;
                     document.getElementById('includeGST').checked = inv.includeGST;
@@ -2230,13 +2362,13 @@
                         });
                     });
 
+                    // Preview with original number
                     const data = buildInvoiceData(inv.invoiceNumber);
                     if (data) renderPreview(data, currentTemplate);
 
-                    switchTab('tab-invoice');
+                    showStatus('✎ Editing invoice #' + inv.invoiceNumber + ' – click "Update Invoice" to save.',
+                        'success');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    showStatus('Editing invoice #' + inv.invoiceNumber + ' – click "Update Invoice" to save.', 'success');
-                    setTimeout(hideStatus, 3000);
                 });
             });
 
@@ -2475,7 +2607,7 @@
         });
 
         // ============================================================
-        // TABS – FIX 5: Clear editing state when switching to New tab
+        // TABS – FIX 5: Clear editing state when manually switching to New tab
         // ============================================================
         function switchTab(tabId) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -2483,8 +2615,13 @@
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 
-            // FIX 5: Clear editing state when switching to New tab
-            if (tabId === 'tab-invoice') {
+            // Only clear editing state if we're switching to the New tab
+            // AND it's NOT already in the middle of an edit flow
+            // We check if the save button text is "✎ Update Invoice" – if so, we keep the state
+            const saveBtn = document.getElementById('saveInvoiceBtn');
+            const isEditing = saveBtn.textContent === '✎ Update Invoice';
+
+            if (tabId === 'tab-invoice' && !isEditing) {
                 document.getElementById('editingInvoiceId').value = '';
                 document.getElementById('editingInvoiceNumber').value = '';
                 document.getElementById('cancelEditBtn').style.display = 'none';
@@ -2522,21 +2659,11 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – FINAL VERSION with all fixes and features!');
-        console.log('✅ FIX 1: -preview suffix handled correctly');
-        console.log('✅ FIX 2: Line item validation fixed');
-        console.log('✅ FIX 3: Tight duplicate check');
-        console.log('✅ FIX 4: numberToWords supports billions');
-        console.log('✅ FIX 5: Editing state cleared on tab switch');
-        console.log('✅ FIX 6: Dark mode null check');
-        console.log('✅ FIX 7: Client ID stored in preview data');
-        console.log('✅ FIX 8: All user input sanitised');
-        console.log('✅ NEW: 4 templates (Classic, Modern, Professional, Compact)');
-        console.log('✅ NEW: Logo upload for each business');
-        console.log('✅ NEW: Client history totals (invoiced + GST)');
-        console.log('✅ NEW: Client summary report (PDF)');
-        console.log('✅ NEW: Mobile-friendly UI/UX');
-        console.log('✅ DEMO: Apex Trading Co (business) + Melbourne Construction Group (client)');
+        console.log('🧾 Invoice App – FINAL with 4 distinct templates and logo fix!');
+        console.log('✅ Templates: Classic, Modern, Professional, Compact – all different layouts');
+        console.log('✅ Logo: Top-left, inline with business details');
+        console.log('✅ Edit flow: Fixed – "Update Invoice" button works correctly');
+        console.log('✅ All previous fixes included');
     </script>
 </body>
 </html>
