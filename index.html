@@ -742,7 +742,35 @@
             border-top: 1px solid #e2e8f0;
         }
 
-        /* ===== HISTORY TOTALS ===== */
+        /* ===== HISTORY TOTALS & DATE FILTERS ===== */
+        .history-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            background: var(--bg-item);
+            border-radius: 12px;
+            border: 1px solid var(--border-card);
+        }
+        .history-filters label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        .history-filters input[type="date"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-input);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-panel);
+            color: var(--text-primary);
+        }
+
         .history-totals {
             background: var(--bg-item);
             border-radius: 14px;
@@ -891,6 +919,11 @@
             #invoicePreview .inv-logo-wrap {
                 max-width: 80px;
                 margin-right: 10px;
+            }
+            .history-filters input[type="date"] {
+                min-width: 70px;
+                font-size: 12px;
+                padding: 4px 6px;
             }
         }
     </style>
@@ -1067,14 +1100,22 @@
     <!-- ===== PANEL: HISTORY ===== -->
     <div class="panel" id="tab-history">
         <h2 style="font-size:18px;">Invoice History</h2>
-        <div class="history-filter">
-            <label for="historyClientFilter">Filter by Client:</label>
+
+        <!-- Filter: Client + Date Range -->
+        <div class="history-filters">
+            <label for="historyClientFilter">Client:</label>
             <select id="historyClientFilter">
                 <option value="all">All Clients</option>
             </select>
+            <label for="reportStartDate">From:</label>
+            <input type="date" id="reportStartDate" />
+            <label for="reportEndDate">To:</label>
+            <input type="date" id="reportEndDate" />
         </div>
+
         <div id="historyTotals" style="display:none;"></div>
         <div id="historyList"></div>
+
         <div class="flex" style="margin-top:8px;">
             <button class="btn btn-secondary btn-sm" id="generateReportBtn" style="flex:0 1 auto;">📄 Generate Report</button>
             <button class="btn btn-danger btn-sm" id="clearHistoryBtn" style="flex:0 1 auto;">🗑️ Clear All</button>
@@ -1806,7 +1847,7 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW – 4 TEMPLATES (Logo top-left, inline details)
+        // RENDER PREVIEW – 4 TEMPLATES
         // ============================================================
         function renderPreview(data, template) {
             const container = document.getElementById('invoicePreview');
@@ -2217,15 +2258,36 @@
         });
 
         // ============================================================
-        // HISTORY – with totals + report
+        // HISTORY – with date‑filtered totals and report
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
             const filterVal = document.getElementById('historyClientFilter').value;
 
+            // Get date filters
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
             let filtered = appData.invoices;
             if (filterVal !== 'all') {
                 filtered = filtered.filter(inv => inv.clientId === filterVal);
+            }
+
+            // Date filter
+            if (startDate || endDate) {
+                filtered = filtered.filter(inv => {
+                    const invDate = new Date(inv.date);
+                    const start = startDate ? new Date(startDate) : null;
+                    const end = endDate ? new Date(endDate) : null;
+                    if (start && invDate < start) return false;
+                    if (end) {
+                        // Set end to end of day
+                        const endOfDay = new Date(end);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        if (invDate > endOfDay) return false;
+                    }
+                    return true;
+                });
             }
 
             // Calculate totals
@@ -2258,7 +2320,7 @@
                         </div>
                     `;
                 document.getElementById('reportBtn').addEventListener('click', function() {
-                    generateReport(filterVal);
+                    generateReport(filterVal, startDate, endDate);
                 });
             } else {
                 totalsContainer.style.display = 'none';
@@ -2293,7 +2355,7 @@
                     `;
             }).join('');
 
-            // Event listeners
+            // Event listeners (same as before)
             document.querySelectorAll('.hist-view').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -2331,16 +2393,13 @@
                     const client = getClient(inv.clientId);
                     if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
 
-                    // Set editing state
                     document.getElementById('editingInvoiceId').value = inv.id;
                     document.getElementById('editingInvoiceNumber').value = inv.invoiceNumber;
                     document.getElementById('cancelEditBtn').style.display = 'inline-block';
                     document.getElementById('saveInvoiceBtn').textContent = '✎ Update Invoice';
 
-                    // Switch tab (but keep state)
                     switchTab('tab-invoice');
 
-                    // Populate form
                     document.getElementById('invBusiness').value = biz.id;
                     document.getElementById('invClient').value = client.id;
                     document.getElementById('includeGST').checked = inv.includeGST;
@@ -2367,7 +2426,6 @@
                         });
                     });
 
-                    // Build fresh data and preview
                     const data = buildInvoiceData(inv.invoiceNumber);
                     if (data) renderPreview(data, currentTemplate);
 
@@ -2473,15 +2531,32 @@
         }
 
         // ============================================================
-        // GENERATE REPORT
+        // GENERATE REPORT (with date filter and dark text)
         // ============================================================
-        function generateReport(clientId) {
+        function generateReport(clientId, startDate, endDate) {
             const client = getClient(clientId);
             if (!client) { showStatus('Client not found.', 'error'); return; }
 
-            const invoices = appData.invoices.filter(inv => inv.clientId === clientId);
+            let invoices = appData.invoices.filter(inv => inv.clientId === clientId);
+
+            // Apply date filter if provided
+            if (startDate || endDate) {
+                invoices = invoices.filter(inv => {
+                    const invDate = new Date(inv.date);
+                    const start = startDate ? new Date(startDate) : null;
+                    const end = endDate ? new Date(endDate) : null;
+                    if (start && invDate < start) return false;
+                    if (end) {
+                        const endOfDay = new Date(end);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        if (invDate > endOfDay) return false;
+                    }
+                    return true;
+                });
+            }
+
             if (invoices.length === 0) {
-                showStatus('No invoices for this client.', 'error');
+                showStatus('No invoices for this client in the selected period.', 'error');
                 return;
             }
 
@@ -2494,6 +2569,11 @@
             reportText += 'Client: ' + client.name + '\n';
             reportText += 'ABN: ' + (client.abn ? formatABN(client.abn) : 'N/A') + '\n';
             reportText += 'Address: ' + (client.address || 'N/A') + '\n';
+            if (startDate || endDate) {
+                const from = startDate ? formatDate(startDate) : 'any';
+                const to = endDate ? formatDate(endDate) : 'any';
+                reportText += 'Period: ' + from + ' – ' + to + '\n';
+            }
             reportText += ''.padEnd(50, '-') + '\n';
             reportText += 'Total Invoices: ' + invoices.length + '\n';
             reportText += 'Total Invoiced: ' + formatCurrency(totalInvoiced) + '\n';
@@ -2513,9 +2593,10 @@
             reportText += ''.padEnd(50, '=') + '\n';
             reportText += 'Report generated: ' + new Date().toLocaleString('en-AU') + '\n';
 
+            // Create a temporary div to render the report for PDF – with DARK TEXT
             const tempDiv = document.createElement('div');
             tempDiv.style.cssText =
-                'position:fixed; top:-9999px; left:-9999px; background:white; padding:40px; font-family:monospace; font-size:14px; line-height:1.8; white-space:pre;';
+                'position:fixed; top:-9999px; left:-9999px; background:white; padding:40px; font-family:monospace; font-size:14px; line-height:1.8; white-space:pre; color:#000000;';
             tempDiv.textContent = reportText;
             document.body.appendChild(tempDiv);
 
@@ -2525,7 +2606,11 @@
                 useCORS: true,
                 logging: false,
                 width: tempDiv.scrollWidth,
-                height: tempDiv.scrollHeight
+                height: tempDiv.scrollHeight,
+                onclone: function(doc) {
+                    const el = doc.querySelector('div');
+                    if (el) el.style.color = '#000000';
+                }
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
@@ -2543,7 +2628,9 @@
                 const xOffset = (pageWidth - imgWidth) / 2;
                 const yOffset = (297 - imgHeight) / 2;
                 doc.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
-                doc.save('report-' + client.name.replace(/\s/g, '_') + '.pdf');
+                const filename = 'report-' + client.name.replace(/\s/g, '_') + (startDate || endDate ? '-period' : '') +
+                    '.pdf';
+                doc.save(filename);
                 document.body.removeChild(tempDiv);
                 showStatus('✅ Report downloaded!', 'success');
                 setTimeout(hideStatus, 3000);
@@ -2552,6 +2639,121 @@
                 showStatus('Report generation failed: ' + err.message, 'error');
             });
         }
+
+        // ============================================================
+        // Bottom "Generate Report" button – handles all clients or filtered
+        // ============================================================
+        document.getElementById('generateReportBtn').addEventListener('click', function() {
+            const filterVal = document.getElementById('historyClientFilter').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            if (filterVal === 'all') {
+                // Report for all clients
+                const allClients = appData.clients;
+                if (allClients.length === 0) {
+                    showStatus('No clients to report on.', 'error');
+                    return;
+                }
+                let reportText = '';
+                reportText += 'SUMMARY REPORT – ALL CLIENTS\n';
+                reportText += ''.padEnd(50, '=') + '\n';
+                if (startDate || endDate) {
+                    const from = startDate ? formatDate(startDate) : 'any';
+                    const to = endDate ? formatDate(endDate) : 'any';
+                    reportText += 'Period: ' + from + ' – ' + to + '\n';
+                }
+                reportText += ''.padEnd(50, '-') + '\n';
+
+                let grandTotal = 0;
+                let grandGst = 0;
+                let grandCount = 0;
+
+                allClients.forEach(client => {
+                    let invs = appData.invoices.filter(inv => inv.clientId === client.id);
+                    if (startDate || endDate) {
+                        invs = invs.filter(inv => {
+                            const invDate = new Date(inv.date);
+                            const start = startDate ? new Date(startDate) : null;
+                            const end = endDate ? new Date(endDate) : null;
+                            if (start && invDate < start) return false;
+                            if (end) {
+                                const endOfDay = new Date(end);
+                                endOfDay.setHours(23, 59, 59, 999);
+                                if (invDate > endOfDay) return false;
+                            }
+                            return true;
+                        });
+                    }
+                    if (invs.length === 0) return;
+                    const totalInv = invs.reduce((s, inv) => s + inv.total, 0);
+                    const totalGst = invs.reduce((s, inv) => s + (inv.gst || 0), 0);
+                    grandTotal += totalInv;
+                    grandGst += totalGst;
+                    grandCount += invs.length;
+                    reportText += client.name + '\n';
+                    reportText += '  Invoices: ' + invs.length + ' | Total: ' + formatCurrency(totalInv) + ' | GST: ' +
+                        formatCurrency(totalGst) + '\n';
+                });
+
+                reportText += ''.padEnd(50, '-') + '\n';
+                reportText += 'GRAND TOTALS\n';
+                reportText += 'Total Invoices: ' + grandCount + '\n';
+                reportText += 'Total Invoiced: ' + formatCurrency(grandTotal) + '\n';
+                reportText += 'Total GST: ' + formatCurrency(grandGst) + '\n';
+                reportText += ''.padEnd(50, '=') + '\n';
+                reportText += 'Report generated: ' + new Date().toLocaleString('en-AU') + '\n';
+
+                const tempDiv = document.createElement('div');
+                tempDiv.style.cssText =
+                    'position:fixed; top:-9999px; left:-9999px; background:white; padding:40px; font-family:monospace; font-size:14px; line-height:1.8; white-space:pre; color:#000000;';
+                tempDiv.textContent = reportText;
+                document.body.appendChild(tempDiv);
+
+                html2canvas(tempDiv, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false,
+                    width: tempDiv.scrollWidth,
+                    height: tempDiv.scrollHeight,
+                    onclone: function(doc) {
+                        const el = doc.querySelector('div');
+                        if (el) el.style.color = '#000000';
+                    }
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = 210;
+                    const margin = 10;
+                    const maxWidth = pageWidth - 2 * margin;
+                    const maxHeight = 297 - 2 * margin;
+                    let imgWidth = maxWidth;
+                    let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    if (imgHeight > maxHeight) {
+                        imgHeight = maxHeight;
+                        imgWidth = (canvas.width * imgHeight) / canvas.height;
+                    }
+                    const xOffset = (pageWidth - imgWidth) / 2;
+                    const yOffset = (297 - imgHeight) / 2;
+                    doc.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+                    doc.save('report-all-clients' + (startDate || endDate ? '-period' : '') + '.pdf');
+                    document.body.removeChild(tempDiv);
+                    showStatus('✅ Report for all clients downloaded!', 'success');
+                    setTimeout(hideStatus, 3000);
+                }).catch(err => {
+                    document.body.removeChild(tempDiv);
+                    showStatus('Report generation failed: ' + err.message, 'error');
+                });
+            } else {
+                // Report for a single client – use the existing generateReport function
+                const clientId = filterVal;
+                const startDateVal = document.getElementById('reportStartDate').value;
+                const endDateVal = document.getElementById('reportEndDate').value;
+                generateReport(clientId, startDateVal, endDateVal);
+            }
+        });
 
         document.getElementById('clearHistoryBtn').addEventListener('click', function() {
             if (!confirm('Delete ALL invoices?')) return;
@@ -2563,6 +2765,8 @@
         });
 
         document.getElementById('historyClientFilter').addEventListener('change', renderHistory);
+        document.getElementById('reportStartDate').addEventListener('change', renderHistory);
+        document.getElementById('reportEndDate').addEventListener('change', renderHistory);
 
         // ============================================================
         // EXPORT / IMPORT
@@ -2618,7 +2822,6 @@
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 
-            // Only clear editing state if switching to New tab and not currently editing
             if (tabId === 'tab-invoice') {
                 const editingId = document.getElementById('editingInvoiceId').value;
                 if (!editingId) {
@@ -2627,12 +2830,14 @@
                     document.getElementById('saveInvoiceBtn').textContent = '💾 Save';
                     hideStatus();
                 }
-                // If editing, keep the "✎ Update Invoice" button text – do nothing
             }
 
-            if (tabId === 'tab-history') { populateHistoryFilter(); renderHistory(); }
-            if (tabId === 'tab-clients') { renderClientList(); filterClientList(); }
-            if (tabId === 'tab-business') { renderBusinessList(); filterBusinessList(); }
+            if (tabId === 'tab-history') { populateHistoryFilter();
+                renderHistory(); }
+            if (tabId === 'tab-clients') { renderClientList();
+                filterClientList(); }
+            if (tabId === 'tab-business') { renderBusinessList();
+                filterBusinessList(); }
             if (tabId === 'tab-invoice') { populateDropdowns(); }
         }
 
@@ -2657,13 +2862,10 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – FINAL VERSION');
-        console.log('✅ Fixed save/update: builds fresh data from form');
-        console.log('✅ Editing state preserved correctly');
-        console.log('✅ 4 distinct templates');
-        console.log('✅ Logo top-left inline');
-        console.log('✅ History totals & report');
-        console.log('✅ All previous fixes included');
+        console.log('🧾 Invoice App – FINAL with date‑filtered reports & fixed font colour');
+        console.log('✅ Report font is now dark/black');
+        console.log('✅ Date range filters for history and reports');
+        console.log('✅ Both report buttons work with date filters');
     </script>
 </body>
 </html>
