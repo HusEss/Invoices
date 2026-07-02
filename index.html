@@ -421,7 +421,7 @@
         }
 
         /* ================================================================
-           INVOICE TEMPLATES – 4 completely different layouts
+           INVOICE TEMPLATES
            ================================================================ */
         #invoicePreview {
             background: white;
@@ -556,175 +556,56 @@
             white-space: pre-wrap;
         }
 
-        /* Template styles (unchanged) */
-        #invoicePreview.template-classic .inv-header {
-            border-bottom: 3px solid #2b6cb0;
-            padding-bottom: 14px;
-        }
-        #invoicePreview.template-classic .inv-title {
-            color: #1a202c;
-            font-size: 24px;
-        }
-        #invoicePreview.template-classic .text-table {
-            background: #f9fafb;
-            border: 1px solid #d1d5db;
-        }
-        #invoicePreview.template-classic .totals {
-            border-top-color: #2b6cb0;
-        }
+        /* Template styles */
+        #invoicePreview.template-classic .inv-header { border-bottom: 3px solid #2b6cb0; padding-bottom: 14px; }
+        #invoicePreview.template-classic .inv-title { color: #1a202c; font-size: 24px; }
+        #invoicePreview.template-classic .text-table { background: #f9fafb; border: 1px solid #d1d5db; }
+        #invoicePreview.template-classic .totals { border-top-color: #2b6cb0; }
 
         #invoicePreview.template-modern .inv-header {
-            border-bottom: none;
-            padding-bottom: 0;
-            background: #f0fdf4;
-            margin: -28px -24px 16px -24px;
-            padding: 20px 24px 16px 24px;
+            border-bottom: none; padding-bottom: 0; background: #f0fdf4;
+            margin: -28px -24px 16px -24px; padding: 20px 24px 16px 24px;
         }
         #invoicePreview.template-modern .inv-title-wrap {
-            background: #065f46;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            margin-top: 8px;
-            width: auto;
-            display: inline-block;
+            background: #065f46; color: white; padding: 8px 16px; border-radius: 6px;
+            margin-top: 8px; width: auto; display: inline-block;
         }
-        #invoicePreview.template-modern .inv-title {
-            color: white;
-            font-size: 20px;
-            letter-spacing: 2px;
-        }
-        #invoicePreview.template-modern .inv-title-small {
-            color: #d1d5db;
-        }
-        #invoicePreview.template-modern .text-table {
-            background: #fff;
-            border: none;
-            border-bottom: 2px solid #d1d5db;
-        }
-        #invoicePreview.template-modern .totals {
-            border-top: 2px solid #d1d5db;
-            background: #f0fdf4;
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-top: 10px;
-        }
-        #invoicePreview.template-modern .totals .grand {
-            color: #065f46;
-        }
-        #invoicePreview.template-modern .footer-note {
-            border-top-color: #d1d5db;
-        }
+        #invoicePreview.template-modern .inv-title { color: white; font-size: 20px; letter-spacing: 2px; }
+        #invoicePreview.template-modern .inv-title-small { color: #d1d5db; }
+        #invoicePreview.template-modern .text-table { background: #fff; border: none; border-bottom: 2px solid #d1d5db; }
+        #invoicePreview.template-modern .totals { border-top: 2px solid #d1d5db; background: #f0fdf4; padding: 12px 16px; border-radius: 6px; margin-top: 10px; }
+        #invoicePreview.template-modern .totals .grand { color: #065f46; }
+        #invoicePreview.template-modern .footer-note { border-top-color: #d1d5db; }
 
         #invoicePreview.template-professional .inv-header {
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 16px;
-            margin-bottom: 16px;
-            background: #f8fafc;
-            margin: -28px -24px 16px -24px;
-            padding: 20px 24px 16px 24px;
+            border-bottom: 2px solid #1e293b; padding-bottom: 16px; margin-bottom: 16px;
+            background: #f8fafc; margin: -28px -24px 16px -24px; padding: 20px 24px 16px 24px;
         }
-        #invoicePreview.template-professional .inv-business-details strong {
-            color: #0f172a;
-        }
-        #invoicePreview.template-professional .inv-title {
-            color: #0f172a;
-            font-size: 20px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-        #invoicePreview.template-professional .inv-meta {
-            background: #f1f5f9;
-            padding: 10px 14px;
-            border-radius: 4px;
-            border-bottom: none;
-            margin: 6px 0 14px;
-        }
-        #invoicePreview.template-professional .bill-to {
-            background: #f8fafc;
-            padding: 10px 14px;
-            border-radius: 4px;
-            border-left: 4px solid #1e293b;
-        }
-        #invoicePreview.template-professional .text-table {
-            background: #fff;
-            border: 1px solid #cbd5e1;
-        }
-        #invoicePreview.template-professional .totals {
-            border-top-color: #cbd5e1;
-            background: #f8fafc;
-            padding: 12px 16px;
-            border-radius: 4px;
-        }
-        #invoicePreview.template-professional .footer-note {
-            border-top-color: #cbd5e1;
-        }
+        #invoicePreview.template-professional .inv-business-details strong { color: #0f172a; }
+        #invoicePreview.template-professional .inv-title { color: #0f172a; font-size: 20px; letter-spacing: 3px; text-transform: uppercase; }
+        #invoicePreview.template-professional .inv-meta { background: #f1f5f9; padding: 10px 14px; border-radius: 4px; border-bottom: none; margin: 6px 0 14px; }
+        #invoicePreview.template-professional .bill-to { background: #f8fafc; padding: 10px 14px; border-radius: 4px; border-left: 4px solid #1e293b; }
+        #invoicePreview.template-professional .text-table { background: #fff; border: 1px solid #cbd5e1; }
+        #invoicePreview.template-professional .totals { border-top-color: #cbd5e1; background: #f8fafc; padding: 12px 16px; border-radius: 4px; }
+        #invoicePreview.template-professional .footer-note { border-top-color: #cbd5e1; }
 
         #invoicePreview.template-compact {
-            padding: 16px 14px;
-            font-size: 11px;
-            line-height: 1.5;
+            padding: 16px 14px; font-size: 11px; line-height: 1.5;
         }
-        #invoicePreview.template-compact .inv-header {
-            border-bottom: 1px solid #d1d5db;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-        }
-        #invoicePreview.template-compact .inv-business-details strong {
-            font-size: 14px;
-        }
-        #invoicePreview.template-compact .inv-business-details {
-            font-size: 11px;
-            line-height: 1.4;
-        }
-        #invoicePreview.template-compact .inv-logo {
-            max-height: 40px;
-        }
-        #invoicePreview.template-compact .inv-title {
-            font-size: 16px;
-            letter-spacing: 0.5px;
-        }
-        #invoicePreview.template-compact .inv-title-small {
-            font-size: 11px;
-        }
-        #invoicePreview.template-compact .inv-meta {
-            font-size: 11px;
-            margin: 4px 0 8px;
-            padding: 4px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        #invoicePreview.template-compact .bill-to {
-            font-size: 11px;
-            margin-bottom: 8px;
-        }
-        #invoicePreview.template-compact .bill-to strong {
-            font-size: 12px;
-        }
-        #invoicePreview.template-compact .text-table {
-            font-size: 11px;
-            padding: 6px 8px;
-            line-height: 1.4;
-            margin: 6px 0 10px;
-            border: 1px solid #e2e8f0;
-        }
-        #invoicePreview.template-compact .totals {
-            margin-top: 6px;
-            padding-top: 8px;
-            border-top: 1px solid #d1d5db;
-        }
-        #invoicePreview.template-compact .totals div {
-            font-size: 12px;
-            padding: 2px 0;
-        }
-        #invoicePreview.template-compact .totals .grand {
-            font-size: 15px;
-        }
-        #invoicePreview.template-compact .footer-note {
-            font-size: 10px;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px solid #e2e8f0;
-        }
+        #invoicePreview.template-compact .inv-header { border-bottom: 1px solid #d1d5db; padding-bottom: 8px; margin-bottom: 8px; }
+        #invoicePreview.template-compact .inv-business-details strong { font-size: 14px; }
+        #invoicePreview.template-compact .inv-business-details { font-size: 11px; line-height: 1.4; }
+        #invoicePreview.template-compact .inv-logo { max-height: 40px; }
+        #invoicePreview.template-compact .inv-title { font-size: 16px; letter-spacing: 0.5px; }
+        #invoicePreview.template-compact .inv-title-small { font-size: 11px; }
+        #invoicePreview.template-compact .inv-meta { font-size: 11px; margin: 4px 0 8px; padding: 4px 0; border-bottom: 1px solid #e2e8f0; }
+        #invoicePreview.template-compact .bill-to { font-size: 11px; margin-bottom: 8px; }
+        #invoicePreview.template-compact .bill-to strong { font-size: 12px; }
+        #invoicePreview.template-compact .text-table { font-size: 11px; padding: 6px 8px; line-height: 1.4; margin: 6px 0 10px; border: 1px solid #e2e8f0; }
+        #invoicePreview.template-compact .totals { margin-top: 6px; padding-top: 8px; border-top: 1px solid #d1d5db; }
+        #invoicePreview.template-compact .totals div { font-size: 12px; padding: 2px 0; }
+        #invoicePreview.template-compact .totals .grand { font-size: 15px; }
+        #invoicePreview.template-compact .footer-note { font-size: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
 
         /* ===== HISTORY TOTALS ===== */
         .history-totals {
@@ -1429,29 +1310,29 @@
             return dt.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        function getMonday(date) {
-            const d = new Date(date);
+        function getMondayStr(dateStr) {
+            const parts = dateStr.split('-').map(Number);
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
             const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            d.setDate(diff);
-            d.setHours(0, 0, 0, 0);
-            return d;
+            const diff = (day === 0 ? -6 : 1) - day;
+            d.setDate(d.getDate() + diff);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dayNum = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + dayNum;
         }
 
-        function getWeekDates(monday) {
+        function getWeekDatesStr(mondayStr) {
+            const parts = mondayStr.split('-').map(Number);
             const dates = [];
             for (let i = 0; i < 7; i++) {
-                const d = new Date(monday);
-                d.setDate(d.getDate() + i);
-                dates.push(d);
+                const d = new Date(parts[0], parts[1] - 1, parts[2] + i);
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                dates.push(y + '-' + m + '-' + day);
             }
             return dates;
-        }
-
-        function getDayName(date) {
-            return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][date.getDay() === 0 ? 6 :
-                date.getDay() - 1
-            ];
         }
 
         function getClient(id) { return appData.clients.find(c => c.id === id); }
@@ -1542,23 +1423,21 @@
         }
 
         // ============================================================
-        // TIMESHEET – FIXED: one entry per day, day dropdown remembers
+        // TIMESHEET (string‑based)
         // ============================================================
-        let currentWeekStart = getMonday(new Date());
+        let currentWeekStartStr = getMondayStr(new Date().toISOString().slice(0, 10));
 
         function renderTimesheet() {
             populateTimesheetClients();
             populateDayDropdown();
 
             const filterClient = document.getElementById('tsClientFilter').value;
-            const weekDates = getWeekDates(currentWeekStart);
-            const weekLabel = 'Week of ' + formatDate(currentWeekStart);
+            const weekDates = getWeekDatesStr(currentWeekStartStr);
+            const weekLabel = 'Week of ' + formatDate(currentWeekStartStr);
             document.getElementById('weekLabel').textContent = weekLabel;
 
             let weekEntries = tsEntries.filter(e => {
-                const entryDate = new Date(e.date);
-                const monday = getMonday(entryDate);
-                return monday.getTime() === currentWeekStart.getTime();
+                return e.date >= weekDates[0] && e.date <= weekDates[6];
             });
 
             if (filterClient !== 'all') {
@@ -1567,8 +1446,7 @@
 
             const daysMap = {};
             weekDates.forEach(d => {
-                const key = d.toISOString().slice(0, 10);
-                daysMap[key] = { date: d, entries: [] };
+                daysMap[d] = { date: d, entries: [] };
             });
             weekEntries.forEach(e => {
                 if (daysMap[e.date]) {
@@ -1583,8 +1461,7 @@
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
             weekDates.forEach((d, idx) => {
-                const key = d.toISOString().slice(0, 10);
-                const dayData = daysMap[key];
+                const dayData = daysMap[d];
                 const dayTotal = dayData.entries.reduce((sum, e) => sum + e.hours, 0);
                 const dayAmount = dayData.entries.reduce((sum, e) => sum + (e.hours * e.rate), 0);
                 totalHours += dayTotal;
@@ -1673,18 +1550,17 @@
 
         function populateDayDropdown() {
             const daySelect = document.getElementById('tsDay');
-            const weekDates = getWeekDates(currentWeekStart);
+            const weekDates = getWeekDatesStr(currentWeekStartStr);
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             const currentVal = daySelect.value;
             daySelect.innerHTML = '';
             weekDates.forEach((d, idx) => {
-                const dateStr = d.toISOString().slice(0, 10);
-                daySelect.innerHTML += `<option value="${dateStr}">${dayNames[idx]} ${formatDate(d)}</option>`;
+                daySelect.innerHTML += `<option value="${d}">${dayNames[idx]} ${formatDate(d)}</option>`;
             });
-            if (currentVal && weekDates.some(d => d.toISOString().slice(0, 10) === currentVal)) {
+            if (currentVal && weekDates.includes(currentVal)) {
                 daySelect.value = currentVal;
             } else {
-                daySelect.value = weekDates[0].toISOString().slice(0, 10);
+                daySelect.value = weekDates[0];
             }
         }
 
@@ -1772,24 +1648,26 @@
         });
 
         document.getElementById('prevWeekBtn').addEventListener('click', function() {
-            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            const d = new Date(currentWeekStartStr);
+            d.setDate(d.getDate() - 7);
+            currentWeekStartStr = getMondayStr(d.toISOString().slice(0, 10));
             renderTimesheet();
         });
         document.getElementById('nextWeekBtn').addEventListener('click', function() {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            const d = new Date(currentWeekStartStr);
+            d.setDate(d.getDate() + 7);
+            currentWeekStartStr = getMondayStr(d.toISOString().slice(0, 10));
             renderTimesheet();
         });
         document.getElementById('tsClientFilter').addEventListener('change', renderTimesheet);
 
-        // ============================================================
-        // CREATE INVOICE FROM TIMESHEET
-        // ============================================================
+        // ---- CREATE INVOICE FROM TIMESHEET ----
         document.getElementById('tsCreateInvoiceBtn').addEventListener('click', function() {
             const rangeDiv = document.getElementById('tsInvoiceRange');
             if (rangeDiv.style.display === 'none') {
                 rangeDiv.style.display = 'block';
                 const today = new Date().toISOString().slice(0, 10);
-                const monday = currentWeekStart.toISOString().slice(0, 10);
+                const monday = currentWeekStartStr;
                 document.getElementById('tsInvStart').value = monday;
                 document.getElementById('tsInvEnd').value = today;
             } else {
@@ -1825,11 +1703,9 @@
 
             const weeks = {};
             entries.forEach(e => {
-                const d = new Date(e.date);
-                const monday = getMonday(d);
-                const weekKey = monday.toISOString().slice(0, 10);
-                if (!weeks[weekKey]) weeks[weekKey] = { monday: monday, entries: [] };
-                weeks[weekKey].entries.push(e);
+                const monday = getMondayStr(e.date);
+                if (!weeks[monday]) weeks[monday] = { monday: monday, entries: [] };
+                weeks[monday].entries.push(e);
             });
 
             const lineItems = [];
@@ -1875,11 +1751,8 @@
         });
 
         // ============================================================
-        // The rest of the app – CRUD, History, Reports, etc.
-        // All existing code remains unchanged.
+        // POPULATE DROPDOWNS & SEARCH FILTERS
         // ============================================================
-
-        // ---- RENDER DROPDOWNS ----
         function populateDropdowns() {
             const bizSelect = document.getElementById('invBusiness');
             const clientSelect = document.getElementById('invClient');
@@ -1902,7 +1775,6 @@
             populateHistoryFilter();
         }
 
-        // ---- SEARCH FILTERS ----
         function filterClientList() {
             const search = document.getElementById('clientSearch').value.toLowerCase().trim();
             const container = document.getElementById('clientList');
@@ -1925,7 +1797,9 @@
         }
         document.getElementById('businessSearch').addEventListener('input', filterBusinessList);
 
-        // ---- HISTORY FILTER ----
+        // ============================================================
+        // HISTORY FILTER
+        // ============================================================
         function populateHistoryFilter() {
             const filter = document.getElementById('historyClientFilter');
             const current = filter.value;
@@ -1937,7 +1811,9 @@
             else filter.value = 'all';
         }
 
-        // ---- RENDER BUSINESS & CLIENT LISTS ----
+        // ============================================================
+        // RENDER BUSINESS & CLIENT LISTS
+        // ============================================================
         function renderBusinessList() {
             const container = document.getElementById('businessList');
             if (appData.businesses.length === 0) {
@@ -1993,7 +1869,9 @@
             filterClientList();
         }
 
-        // ---- CRUD: BUSINESS ----
+        // ============================================================
+        // CRUD: BUSINESS
+        // ============================================================
         function editBusiness(id) {
             const b = getBusiness(id);
             if (!b) return;
@@ -2100,7 +1978,9 @@
             }
         });
 
-        // ---- CRUD: CLIENT ----
+        // ============================================================
+        // CRUD: CLIENT
+        // ============================================================
         function editClient(id) {
             const c = getClient(id);
             if (!c) return;
@@ -2190,7 +2070,9 @@
             }
         });
 
-        // ---- LOGO HANDLING ----
+        // ============================================================
+        // LOGO HANDLING
+        // ============================================================
         function resizeLogo(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -2252,7 +2134,9 @@
             document.getElementById('removeLogoBtn').style.display = 'none';
         });
 
-        // ---- LINE ITEMS ----
+        // ============================================================
+        // LINE ITEMS
+        // ============================================================
         document.getElementById('addLineItem').addEventListener('click', function() {
             const container = document.getElementById('lineItemsContainer');
             const div = document.createElement('div');
@@ -2304,7 +2188,9 @@
             return items;
         }
 
-        // ---- TEMPLATE SELECTOR ----
+        // ============================================================
+        // TEMPLATE SELECTOR
+        // ============================================================
         let currentTemplate = 'classic';
         document.querySelectorAll('.template-option').forEach(el => {
             el.addEventListener('click', function() {
@@ -2318,7 +2204,9 @@
             });
         });
 
-        // ---- BUILD INVOICE DATA ----
+        // ============================================================
+        // BUILD INVOICE DATA
+        // ============================================================
         function buildInvoiceData(invoiceNumber) {
             const bizId = document.getElementById('invBusiness').value;
             const clientId = document.getElementById('invClient').value;
@@ -2364,7 +2252,9 @@
             };
         }
 
-        // ---- RENDER PREVIEW ----
+        // ============================================================
+        // RENDER PREVIEW
+        // ============================================================
         function renderPreview(data, template) {
             const container = document.getElementById('invoicePreview');
             if (!data) { container.style.display = 'none'; return; }
@@ -2448,7 +2338,9 @@
             hideStatus();
         }
 
-        // ---- PREVIEW BUTTON ----
+        // ============================================================
+        // PREVIEW BUTTON
+        // ============================================================
         document.getElementById('previewBtn').addEventListener('click', function() {
             const clientId = document.getElementById('invClient').value;
             let previewNumber = 'PREVIEW-' + Date.now().toString(36).toUpperCase();
@@ -2463,7 +2355,9 @@
             }
         });
 
-        // ---- PDF / PNG / SHARE ----
+        // ============================================================
+        // PDF / PNG / SHARE
+        // ============================================================
         function captureInvoiceLight(previewElement) {
             const body = document.body;
             const wasDark = body.classList.contains('dark-mode');
@@ -2626,7 +2520,9 @@
         document.getElementById('generatePdfBtn').addEventListener('click', () => generateFromPreview('pdf'));
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
-        // ---- SAVE INVOICE ----
+        // ============================================================
+        // SAVE INVOICE
+        // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const editingId = document.getElementById('editingInvoiceId').value;
             let originalNumber = null,
@@ -2703,7 +2599,9 @@
             setTimeout(hideStatus, 2000);
         });
 
-        // ---- HISTORY ----
+        // ============================================================
+        // HISTORY & REPORTS
+        // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
             const filterVal = document.getElementById('historyClientFilter').value;
@@ -2901,7 +2799,6 @@
             });
         }
 
-        // ---- GENERATE REPORT ----
         function generateReport(clientId, startDate, endDate) {
             const client = getClient(clientId);
             if (!client) { showStatus('Client not found.', 'error'); return; }
@@ -3085,7 +2982,9 @@
         });
         document.getElementById('historyClientFilter').addEventListener('change', renderHistory);
 
-        // ---- EXPORT / IMPORT ----
+        // ============================================================
+        // EXPORT / IMPORT
+        // ============================================================
         document.getElementById('exportDataBtn').addEventListener('click', function() {
             const json = JSON.stringify(appData, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
@@ -3128,7 +3027,9 @@
             this.value = '';
         });
 
-        // ---- TABS ----
+        // ============================================================
+        // TABS
+        // ============================================================
         function switchTab(tabId) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -3164,7 +3065,9 @@
             });
         });
 
-        // ---- RENDER ALL ----
+        // ============================================================
+        // RENDER ALL
+        // ============================================================
         function renderAll() {
             populateDropdowns();
             renderBusinessList();
@@ -3177,7 +3080,7 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – complete with timesheet fixes!');
+        console.log('🧾 Invoice App – COMPLETE with all features + timesheet Monday fix!');
     </script>
 </body>
 </html>
