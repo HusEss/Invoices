@@ -2135,7 +2135,7 @@
         });
 
         // ============================================================
-        // LINE ITEMS – FIXED: skips empty rows
+        // LINE ITEMS – ULTRA LENIENT (skips empty/partial rows)
         // ============================================================
         document.getElementById('addLineItem').addEventListener('click', function() {
             const container = document.getElementById('lineItemsContainer');
@@ -2167,33 +2167,21 @@
 
         function getLineItems() {
             const items = [];
-            let hasError = false;
             document.querySelectorAll('.line-item').forEach(row => {
                 const desc = row.querySelector('.li-desc').value.trim() || 'Service';
                 const hours = parseFloat(row.querySelector('.li-hours').value);
                 const rate = parseFloat(row.querySelector('.li-rate').value);
 
-                // If both hours and rate are empty (or NaN), skip this row – it's an empty row
-                if (isNaN(hours) && isNaN(rate)) {
-                    return;
-                }
-
-                // If one is filled but the other is invalid, that's an error
-                if (isNaN(hours) || isNaN(rate) || hours <= 0 || rate <= 0) {
-                    hasError = true;
-                } else {
+                // Only keep rows where both hours and rate are valid numbers > 0
+                if (!isNaN(hours) && !isNaN(rate) && hours > 0 && rate > 0) {
                     const start = row.querySelector('.li-start').value || '';
                     const end = row.querySelector('.li-end').value || '';
                     items.push({ description: desc, hours, rate, amount: hours * rate, start, end });
                 }
             });
 
-            if (hasError) {
-                showStatus('All filled line items need Qty/Hrs > 0 and Rate > 0.', 'error');
-                return null;
-            }
             if (items.length === 0) {
-                showStatus('Add at least one valid line item.', 'error');
+                showStatus('Add at least one valid line item (Qty/Hrs > 0 and Rate > 0).', 'error');
                 return null;
             }
             hideStatus();
@@ -2265,105 +2253,133 @@
         }
 
         // ============================================================
-        // RENDER PREVIEW
+        // RENDER PREVIEW – with error handling
         // ============================================================
         function renderPreview(data, template) {
-            const container = document.getElementById('invoicePreview');
-            if (!data) { container.style.display = 'none'; return; }
-            const tmpl = template || currentTemplate;
-            const { business, client, items, subtotal, gst, total, includeGST, invoiceNumber, date, paymentTerms,
-                bankDetails, invoiceNotes, totalWords } = data;
-            const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
-            const colDesc = 30,
-                colQty = 8,
-                colRate = 10,
-                colAmount = 10;
-            let tableText = '';
-            tableText += 'DESCRIPTION'.padEnd(colDesc) + 'QTY/HRS'.padEnd(colQty) + 'RATE'.padEnd(colRate) + 'AMOUNT\n';
-            tableText += ''.padEnd(colDesc + colQty + colRate + colAmount, '-') + '\n';
-            items.forEach(i => {
-                let dateRange = '';
-                if (i.start || i.end) {
-                    const s = i.start ? formatDate(i.start) : '';
-                    const e = i.end ? formatDate(i.end) : '';
-                    dateRange = (s || e) ? (s && e ? s + ' – ' + e : s || e) : '';
+            try {
+                const container = document.getElementById('invoicePreview');
+                if (!container) {
+                    showStatus('Error: Preview container not found.', 'error');
+                    return;
                 }
-                let descLine = i.description;
-                if (descLine.length > colDesc) {
-                    descLine = descLine.slice(0, colDesc - 3) + '...';
+                if (!data) {
+                    container.style.display = 'none';
+                    showStatus('No data to preview.', 'error');
+                    return;
                 }
-                const paddedDesc = descLine.padEnd(colDesc);
-                const qtyStr = String(i.hours).padEnd(colQty);
-                const rateStr = formatCurrency(i.rate).padEnd(colRate);
-                const amountStr = formatCurrency(i.amount).padEnd(colAmount);
-                tableText += paddedDesc + qtyStr + rateStr + amountStr + '\n';
-                if (dateRange) {
-                    const dateLine = '    ' + dateRange;
-                    const maxDateLen = colDesc + colQty + colRate + colAmount - 4;
-                    const truncated = dateLine.length > maxDateLen ? dateLine.slice(0, maxDateLen - 3) + '...' : dateLine;
-                    tableText += truncated.padEnd(colDesc + colQty + colRate + colAmount) + '\n';
+
+                const tmpl = template || currentTemplate;
+                const { business, client, items, subtotal, gst, total, includeGST, invoiceNumber, date, paymentTerms,
+                    bankDetails, invoiceNotes, totalWords } = data;
+
+                if (!items || items.length === 0) {
+                    showStatus('No line items to display.', 'error');
+                    return;
                 }
-            });
-            const logoHtml = business.logo ? `<img src="${business.logo}" alt="Logo" class="inv-logo" />` : '';
-            container.className = 'template-' + tmpl;
-            container.innerHTML = `
-                <div class="inv-header">
-                    <div class="inv-logo-wrap">${logoHtml}</div>
-                    <div class="inv-business-details">
-                        <strong>${escapeHtml(business.name)}</strong>
-                        ${business.abn ? 'ABN: ' + formatABN(business.abn) : ''}<br />
-                        ${escapeHtml(business.address || '')}<br />
-                        ${escapeHtml(business.phone || '')}<br />
-                        ${escapeHtml(business.email || '')}
+
+                const gstLabel = includeGST ? 'GST (10%)' : 'GST (not applied)';
+                const colDesc = 30,
+                    colQty = 8,
+                    colRate = 10,
+                    colAmount = 10;
+
+                let tableText = '';
+                tableText += 'DESCRIPTION'.padEnd(colDesc) + 'QTY/HRS'.padEnd(colQty) + 'RATE'.padEnd(colRate) + 'AMOUNT\n';
+                tableText += ''.padEnd(colDesc + colQty + colRate + colAmount, '-') + '\n';
+
+                items.forEach(i => {
+                    let dateRange = '';
+                    if (i.start || i.end) {
+                        const s = i.start ? formatDate(i.start) : '';
+                        const e = i.end ? formatDate(i.end) : '';
+                        dateRange = (s || e) ? (s && e ? s + ' – ' + e : s || e) : '';
+                    }
+                    let descLine = i.description;
+                    if (descLine.length > colDesc) {
+                        descLine = descLine.slice(0, colDesc - 3) + '...';
+                    }
+                    const paddedDesc = descLine.padEnd(colDesc);
+                    const qtyStr = String(i.hours).padEnd(colQty);
+                    const rateStr = formatCurrency(i.rate).padEnd(colRate);
+                    const amountStr = formatCurrency(i.amount).padEnd(colAmount);
+                    tableText += paddedDesc + qtyStr + rateStr + amountStr + '\n';
+                    if (dateRange) {
+                        const dateLine = '    ' + dateRange;
+                        const maxDateLen = colDesc + colQty + colRate + colAmount - 4;
+                        const truncated = dateLine.length > maxDateLen ? dateLine.slice(0, maxDateLen - 3) + '...' : dateLine;
+                        tableText += truncated.padEnd(colDesc + colQty + colRate + colAmount) + '\n';
+                    }
+                });
+
+                const logoHtml = business.logo ? `<img src="${business.logo}" alt="Logo" class="inv-logo" />` : '';
+                container.className = 'template-' + tmpl;
+                container.innerHTML = `
+                    <div class="inv-header">
+                        <div class="inv-logo-wrap">${logoHtml}</div>
+                        <div class="inv-business-details">
+                            <strong>${escapeHtml(business.name)}</strong>
+                            ${business.abn ? 'ABN: ' + formatABN(business.abn) : ''}<br />
+                            ${escapeHtml(business.address || '')}<br />
+                            ${escapeHtml(business.phone || '')}<br />
+                            ${escapeHtml(business.email || '')}
+                        </div>
+                        <div class="inv-title-wrap">
+                            <span class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</span>
+                            <span class="inv-title-small"># ${escapeHtml(invoiceNumber)}</span>
+                        </div>
                     </div>
-                    <div class="inv-title-wrap">
-                        <span class="inv-title">${includeGST ? 'TAX INVOICE' : 'INVOICE'}</span>
-                        <span class="inv-title-small"># ${escapeHtml(invoiceNumber)}</span>
+                    <div class="inv-meta">
+                        <span class="left">Invoice # ${escapeHtml(invoiceNumber)}</span>
+                        <span class="right">Date: ${formatDate(date)}</span>
                     </div>
-                </div>
-                <div class="inv-meta">
-                    <span class="left">Invoice # ${escapeHtml(invoiceNumber)}</span>
-                    <span class="right">Date: ${formatDate(date)}</span>
-                </div>
-                <div class="bill-to">
-                    <strong>Bill to:</strong>
-                    ${escapeHtml(client.name)}<br />
-                    ${client.abn ? 'ABN: ' + formatABN(client.abn) : ''}<br />
-                    ${escapeHtml(client.address || '')}<br />
-                    ${escapeHtml(client.email || '')}
-                </div>
-                <div class="text-table">${escapeHtml(tableText)}</div>
-                <div class="totals">
-                    <div>Subtotal: ${formatCurrency(subtotal)}</div>
-                    <div>${escapeHtml(gstLabel)}: ${formatCurrency(gst)}</div>
-                    <div class="grand">Total: ${formatCurrency(total)}</div>
-                    <div class="words">${escapeHtml(totalWords)}</div>
-                </div>
-                <div class="footer-note">
-                    <div>Payment Terms: ${escapeHtml(paymentTerms)}</div>
-                    ${bankDetails ? '<div>Bank: ' + escapeHtml(bankDetails) + '</div>' : ''}
-                    ${invoiceNotes ? '<div style="margin-top:6px;">' + escapeHtml(invoiceNotes) + '</div>' : ''}
-                </div>
-            `;
-            container.style.display = 'block';
-            container._invoiceData = data;
-            hideStatus();
+                    <div class="bill-to">
+                        <strong>Bill to:</strong>
+                        ${escapeHtml(client.name)}<br />
+                        ${client.abn ? 'ABN: ' + formatABN(client.abn) : ''}<br />
+                        ${escapeHtml(client.address || '')}<br />
+                        ${escapeHtml(client.email || '')}
+                    </div>
+                    <div class="text-table">${escapeHtml(tableText)}</div>
+                    <div class="totals">
+                        <div>Subtotal: ${formatCurrency(subtotal)}</div>
+                        <div>${escapeHtml(gstLabel)}: ${formatCurrency(gst)}</div>
+                        <div class="grand">Total: ${formatCurrency(total)}</div>
+                        <div class="words">${escapeHtml(totalWords)}</div>
+                    </div>
+                    <div class="footer-note">
+                        <div>Payment Terms: ${escapeHtml(paymentTerms)}</div>
+                        ${bankDetails ? '<div>Bank: ' + escapeHtml(bankDetails) + '</div>' : ''}
+                        ${invoiceNotes ? '<div style="margin-top:6px;">' + escapeHtml(invoiceNotes) + '</div>' : ''}
+                    </div>
+                `;
+                container.style.display = 'block';
+                container._invoiceData = data;
+                hideStatus();
+            } catch (err) {
+                showStatus('Error rendering invoice: ' + err.message, 'error');
+                console.error('renderPreview error:', err);
+            }
         }
 
         // ============================================================
         // PREVIEW BUTTON
         // ============================================================
         document.getElementById('previewBtn').addEventListener('click', function() {
-            const clientId = document.getElementById('invClient').value;
-            let previewNumber = 'PREVIEW-' + Date.now().toString(36).toUpperCase();
-            if (clientId) {
-                const peeked = peekNextInvoiceNumber(clientId);
-                if (peeked) previewNumber = peeked + '-preview';
-            }
-            const data = buildInvoiceData(previewNumber);
-            if (data) {
-                renderPreview(data, currentTemplate);
-                document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+                const clientId = document.getElementById('invClient').value;
+                let previewNumber = 'PREVIEW-' + Date.now().toString(36).toUpperCase();
+                if (clientId) {
+                    const peeked = peekNextInvoiceNumber(clientId);
+                    if (peeked) previewNumber = peeked + '-preview';
+                }
+                const data = buildInvoiceData(previewNumber);
+                if (data) {
+                    renderPreview(data, currentTemplate);
+                    document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch (err) {
+                showStatus('Preview error: ' + err.message, 'error');
+                console.error('Preview error:', err);
             }
         });
 
@@ -2680,6 +2696,39 @@
         }
 
         function attachHistoryEvents() {
+            document.querySelectorAll('.hist-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    try {
+                        const inv = appData.invoices.find(i => i.id === this.dataset.id);
+                        if (!inv) return;
+                        const biz = getBusiness(inv.businessId);
+                        const client = getClient(inv.clientId);
+                        if (!biz || !client) { showStatus('Business or client missing.', 'error'); return; }
+                        const data = {
+                            business: biz,
+                            client: client,
+                            items: inv.items,
+                            subtotal: inv.subtotal,
+                            gst: inv.gst,
+                            total: inv.total,
+                            includeGST: inv.includeGST,
+                            invoiceNumber: inv.invoiceNumber,
+                            date: inv.date,
+                            paymentTerms: inv.paymentTerms || '30 days',
+                            bankDetails: inv.bankDetails || '',
+                            invoiceNotes: inv.invoiceNotes || '',
+                            totalWords: inv.totalWords || '',
+                            clientId: client.id
+                        };
+                        renderPreview(data, currentTemplate);
+                        switchTab('tab-invoice');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } catch (err) {
+                        showStatus('Error viewing invoice: ' + err.message, 'error');
+                        console.error('View error:', err);
+                    }
+                });
+            });
             document.querySelectorAll('.hist-edit').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const inv = appData.invoices.find(i => i.id === this.dataset.id);
@@ -3092,7 +3141,7 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – COMPLETE with all features + Monday fix + empty row skip!');
+        console.log('🧾 Invoice App – COMPLETE with all fixes + ultra-lenient line items + error handling!');
     </script>
 </body>
 </html>
