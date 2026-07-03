@@ -1423,7 +1423,7 @@
         }
 
         // ============================================================
-        // TIMESHEET (string‑based)
+        // TIMESHEET
         // ============================================================
         let currentWeekStartStr = getMondayStr(new Date().toISOString().slice(0, 10));
 
@@ -2135,7 +2135,7 @@
         });
 
         // ============================================================
-        // LINE ITEMS
+        // LINE ITEMS – FIXED: skips empty rows
         // ============================================================
         document.getElementById('addLineItem').addEventListener('click', function() {
             const container = document.getElementById('lineItemsContainer');
@@ -2172,6 +2172,13 @@
                 const desc = row.querySelector('.li-desc').value.trim() || 'Service';
                 const hours = parseFloat(row.querySelector('.li-hours').value);
                 const rate = parseFloat(row.querySelector('.li-rate').value);
+
+                // If both hours and rate are empty (or NaN), skip this row – it's an empty row
+                if (isNaN(hours) && isNaN(rate)) {
+                    return;
+                }
+
+                // If one is filled but the other is invalid, that's an error
                 if (isNaN(hours) || isNaN(rate) || hours <= 0 || rate <= 0) {
                     hasError = true;
                 } else {
@@ -2180,8 +2187,13 @@
                     items.push({ description: desc, hours, rate, amount: hours * rate, start, end });
                 }
             });
-            if (hasError || items.length === 0) {
-                showStatus('All line items need Qty/Hrs > 0 and Rate > 0.', 'error');
+
+            if (hasError) {
+                showStatus('All filled line items need Qty/Hrs > 0 and Rate > 0.', 'error');
+                return null;
+            }
+            if (items.length === 0) {
+                showStatus('Add at least one valid line item.', 'error');
                 return null;
             }
             hideStatus();
@@ -3080,7 +3092,7 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – COMPLETE with all features + timesheet Monday fix!');
+        console.log('🧾 Invoice App – COMPLETE with all features + Monday fix + empty row skip!');
     </script>
 </body>
 </html>
