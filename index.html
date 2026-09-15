@@ -817,6 +817,8 @@
             border-radius: 12px;
             border: 1px solid var(--border-card);
             display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
             justify-content: space-between;
             font-weight: 600;
             font-size: 15px;
@@ -905,6 +907,25 @@
             color: var(--text-muted);
             padding: 20px 0;
             font-size: 14px;
+        }
+
+        /* ===== OT HINT & FIELDS (NEW) ===== */
+        .ot-hint {
+            padding: 8px 12px;
+            background: var(--bg-item);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: none;
+        }
+        .ot-fields {
+            display: none;
+            background: var(--bg-item);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-top: 8px;
+            border: 1px solid var(--border-card);
         }
 
         @media (max-width: 480px) {
@@ -1000,7 +1021,6 @@
         <label for="invClient">Client</label>
         <select id="invClient"><option value="">— Select Client —</option></select>
 
-        <!-- NEW: Custom Invoice Number Field -->
         <label for="customInvoiceNumber" style="margin-top:12px;">Invoice Number (optional)</label>
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <input type="text" id="customInvoiceNumber" placeholder="Leave blank for auto" style="flex:1; min-width:120px;" />
@@ -1080,6 +1100,23 @@
         <textarea id="clientAddress" placeholder="Street, Suburb, State, Postcode"></textarea>
         <label>Email</label>
         <input type="email" id="clientEmail" placeholder="billing@client.com" />
+
+        <!-- NEW: Overtime settings -->
+        <div class="toggle-wrap">
+            <input type="checkbox" id="clientChargeOT" />
+            <label for="clientChargeOT">Charge overtime</label>
+        </div>
+        <div class="ot-fields" id="otFields">
+            <label style="margin-top:0;">Overtime Rate ($/hr)</label>
+            <input type="number" id="clientOTRate" step="0.01" min="0" placeholder="e.g. 60.00" />
+            <label>Overtime After (hrs)</label>
+            <input type="number" id="clientOTAfter" step="0.5" min="0" placeholder="e.g. 8" value="8" />
+            <div class="toggle-wrap">
+                <input type="checkbox" id="clientSaturdayOT" />
+                <label for="clientSaturdayOT">Saturdays always at OT rate</label>
+            </div>
+        </div>
+
         <div class="flex">
             <button class="btn" id="saveClientBtn">💾 Save Client</button>
             <button class="btn btn-secondary" id="cancelClientBtn" style="display:none;">Cancel</button>
@@ -1161,6 +1198,7 @@
                 <label>Rate ($)</label>
                 <input type="number" id="tsRate" step="0.01" min="0" placeholder="55.00" />
             </div>
+            <div class="ot-hint" id="tsOTHint"></div>
             <button class="btn btn-sm" id="tsAddBtn">➕ Add Entry</button>
             <input type="hidden" id="tsEditId" value="" />
         </div>
@@ -1169,7 +1207,9 @@
 
         <div class="timesheet-summary" id="tsSummary">
             <span>Total Hours: <span id="tsTotalHours">0.0</span> hrs</span>
-            <span class="total-amount">Total Amount: <span id="tsTotalAmount">$0.00</span></span>
+            <span>Normal: <span id="tsNormalAmount">$0.00</span></span>
+            <span id="tsOTWrapper" style="display:none;">Overtime: <span id="tsOTAmount">$0.00</span></span>
+            <span class="total-amount">Total: <span id="tsTotalAmount">$0.00</span></span>
         </div>
 
         <div style="margin-top:12px;">
@@ -1249,7 +1289,13 @@
                     if (!data.businesses) data.businesses = [];
                     if (!data.clients) data.clients = [];
                     if (!data.invoices) data.invoices = [];
-                    data.clients.forEach(c => { if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1; });
+                    data.clients.forEach(c => {
+                        if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1;
+                        if (c.chargeOvertime === undefined) c.chargeOvertime = false;
+                        if (c.overtimeRate === undefined) c.overtimeRate = 0;
+                        if (c.overtimeAfter === undefined) c.overtimeAfter = 8;
+                        if (c.saturdaysAtOT === undefined) c.saturdaysAtOT = false;
+                    });
                     data.businesses.forEach(b => { if (b.logo === undefined) b.logo = null; });
                     return data;
                 }
@@ -1298,7 +1344,11 @@
                     abn: '12345678901',
                     address: '88 Collins Street, Melbourne VIC 3000',
                     email: 'accounts@melbconstruct.com.au',
-                    nextInvoiceNumber: 1
+                    nextInvoiceNumber: 1,
+                    chargeOvertime: false,
+                    overtimeRate: 0,
+                    overtimeAfter: 8,
+                    saturdaysAtOT: false
                 });
                 saveData(appData);
             }
@@ -1342,6 +1392,13 @@
             return dates;
         }
 
+        // NEW: Get day-of-week (0=Sun, 6=Sat) from a YYYY-MM-DD string
+        function getDayOfWeek(dateStr) {
+            const parts = dateStr.split('-').map(Number);
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            return d.getDay();
+        }
+
         function getClient(id) { return appData.clients.find(c => c.id === id); }
 
         function getBusiness(id) { return appData.businesses.find(b => b.id === id); }
@@ -1364,7 +1421,6 @@
 
         function getTempInvoiceNumber() { return 'PREVIEW-' + Date.now().toString(36).toUpperCase(); }
 
-        // ---- NEW: Extract invoice number from custom input ----
         function parseCustomInvoiceNumber(input) {
             if (!input || input.trim() === '') return null;
             const cleaned = input.trim().toUpperCase().replace(/INV-/g, '').trim();
@@ -1387,10 +1443,9 @@
             }
         }
 
-        // Listen to client dropdown changes to update the "Next" display
         document.getElementById('invClient').addEventListener('change', updateNextInvoiceDisplay);
 
-        // ---- formatABN, cleanABN, formatBSB, cleanBSB, numberToWords, escapeHtml, showStatus, hideStatus ----
+        // ---- ABN / BSB / Words / Escape ----
         function formatABN(raw) {
             const digits = String(raw).replace(/\D/g, '');
             if (digits.length !== 11) return raw;
@@ -1464,6 +1519,55 @@
         }
 
         // ============================================================
+        // NEW: OVERTIME SPLIT HELPER
+        // ============================================================
+        function getEntrySplit(entry, client) {
+            const totalHours = parseFloat(entry.hours) || 0;
+            const standardRate = parseFloat(entry.rate) || 0;
+
+            // No OT – return all hours as normal
+            if (!client || !client.chargeOvertime) {
+                return { normalHours: totalHours, normalRate: standardRate, otHours: 0, otRate: 0 };
+            }
+
+            const dow = getDayOfWeek(entry.date);
+            const isSaturday = dow === 6;
+            const otThreshold = parseFloat(client.overtimeAfter) > 0 ? parseFloat(client.overtimeAfter) : 8;
+            const otRate = parseFloat(client.overtimeRate) > 0 ? parseFloat(client.overtimeRate) : standardRate;
+
+            // Saturdays always OT
+            if (isSaturday && client.saturdaysAtOT) {
+                return { normalHours: 0, normalRate: standardRate, otHours: totalHours, otRate: otRate };
+            }
+
+            // Weekday: normal up to threshold, then OT
+            if (totalHours <= otThreshold) {
+                return { normalHours: totalHours, normalRate: standardRate, otHours: 0, otRate: 0 };
+            }
+            return {
+                normalHours: otThreshold,
+                normalRate: standardRate,
+                otHours: totalHours - otThreshold,
+                otRate: otRate
+            };
+        }
+
+        function updateOTHint() {
+            const clientId = document.getElementById('tsClient').value;
+            const hint = document.getElementById('tsOTHint');
+            if (!clientId) { hint.style.display = 'none'; return; }
+            const client = getClient(clientId);
+            if (client && client.chargeOvertime) {
+                let text = '⚡ Overtime: over ' + client.overtimeAfter + ' hrs @ $' + parseFloat(client.overtimeRate).toFixed(2) + '/hr';
+                if (client.saturdaysAtOT) text += ' · Saturdays all at OT';
+                hint.textContent = text;
+                hint.style.display = 'block';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        // ============================================================
         // TIMESHEET
         // ============================================================
         let currentWeekStartStr = getMondayStr(new Date().toISOString().slice(0, 10));
@@ -1498,15 +1602,21 @@
             const grid = document.getElementById('tsEntriesGrid');
             let html = '';
             let totalHours = 0;
-            let totalAmount = 0;
+            let totalNormalAmount = 0;
+            let totalOTAmount = 0;
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
             weekDates.forEach((d, idx) => {
                 const dayData = daysMap[d];
-                const dayTotal = dayData.entries.reduce((sum, e) => sum + e.hours, 0);
-                const dayAmount = dayData.entries.reduce((sum, e) => sum + (e.hours * e.rate), 0);
+                let dayTotal = 0;
+                dayData.entries.forEach(e => {
+                    const client = getClient(e.clientId);
+                    const split = getEntrySplit(e, client);
+                    dayTotal += split.normalHours + split.otHours;
+                    totalNormalAmount += split.normalHours * split.normalRate;
+                    totalOTAmount += split.otHours * split.otRate;
+                });
                 totalHours += dayTotal;
-                totalAmount += dayAmount;
 
                 html += `<div class="timesheet-day">`;
                 html += `<div class="day-header">`;
@@ -1520,15 +1630,26 @@
                     dayData.entries.forEach(e => {
                         const client = getClient(e.clientId);
                         const clientName = client ? client.name : 'Unknown';
+                        const split = getEntrySplit(e, client);
                         const breakText = e.break ? 'Break' : 'No Break';
                         const timeStr = `${e.startTime}–${e.finishTime}`;
+
+                        let rateDisplay;
+                        if (split.otHours > 0 && split.normalHours > 0) {
+                            rateDisplay = split.normalHours.toFixed(1) + ' @ $' + split.normalRate.toFixed(2) + ' + ' + split.otHours.toFixed(1) + ' @ $' + split.otRate.toFixed(2);
+                        } else if (split.otHours > 0) {
+                            rateDisplay = 'Sat @ $' + split.otRate.toFixed(2);
+                        } else {
+                            rateDisplay = '$' + split.normalRate.toFixed(2) + '/hr';
+                        }
+
                         html += `<div class="timesheet-entry">`;
                         html += `<div class="entry-info">`;
                         html += `<span>${timeStr}</span>`;
                         html += `<span style="font-weight:600;color:var(--text-primary);">${e.hours.toFixed(1)} hrs</span>`;
                         html += `<span style="color:var(--text-muted);">${breakText}</span>`;
                         html += `<span style="color:var(--text-secondary);">${escapeHtml(clientName)}</span>`;
-                        html += `<span style="color:var(--text-secondary);">$ ${e.rate.toFixed(2)}/hr</span>`;
+                        html += `<span style="color:var(--text-secondary);">${rateDisplay}</span>`;
                         html += `</div>`;
                         html += `<div class="entry-actions">`;
                         html += `<button data-id="${e.id}" class="ts-edit" title="Edit">✎</button>`;
@@ -1542,7 +1663,10 @@
 
             grid.innerHTML = html;
             document.getElementById('tsTotalHours').textContent = totalHours.toFixed(1);
-            document.getElementById('tsTotalAmount').textContent = formatCurrency(totalAmount);
+            document.getElementById('tsNormalAmount').textContent = formatCurrency(totalNormalAmount);
+            document.getElementById('tsOTAmount').textContent = formatCurrency(totalOTAmount);
+            document.getElementById('tsOTWrapper').style.display = totalOTAmount > 0 ? 'inline' : 'none';
+            document.getElementById('tsTotalAmount').textContent = formatCurrency(totalNormalAmount + totalOTAmount);
 
             document.querySelectorAll('.ts-edit').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1557,6 +1681,7 @@
                         document.getElementById('tsClient').value = entry.clientId || '';
                         document.getElementById('tsRate').value = entry.rate;
                         document.getElementById('tsAddBtn').textContent = '✎ Update Entry';
+                        updateOTHint();
                     }
                 });
             });
@@ -1604,6 +1729,8 @@
                 daySelect.value = weekDates[0];
             }
         }
+
+        document.getElementById('tsClient').addEventListener('change', updateOTHint);
 
         document.getElementById('tsAddBtn').addEventListener('click', function() {
             const editId = document.getElementById('tsEditId').value;
@@ -1750,19 +1877,35 @@
             });
 
             const lineItems = [];
-            Object.keys(weeks).forEach(key => {
+            const clientNameForDesc = filterClient !== 'all' ? (getClient(filterClient)?.name || '') : '';
+
+            Object.keys(weeks).sort().forEach(key => {
                 const weekData = weeks[key];
-                const totalHours = weekData.entries.reduce((sum, e) => sum + e.hours, 0);
-                const totalAmount = weekData.entries.reduce((sum, e) => sum + (e.hours * e.rate), 0);
-                const avgRate = totalAmount / totalHours;
-                const clientName = filterClient !== 'all' ? getClient(filterClient)?.name || '' : '';
-                const desc = `Week of ${formatDate(weekData.monday)}${clientName ? ' – ' + clientName : ''}`;
-                lineItems.push({
-                    description: desc,
-                    hours: totalHours,
-                    rate: avgRate,
-                    amount: totalAmount
+                let normalHours = 0, normalAmount = 0, otHours = 0, otAmount = 0;
+                weekData.entries.forEach(e => {
+                    const client = getClient(e.clientId);
+                    const split = getEntrySplit(e, client);
+                    normalHours += split.normalHours;
+                    normalAmount += split.normalHours * split.normalRate;
+                    otHours += split.otHours;
+                    otAmount += split.otHours * split.otRate;
                 });
+
+                const weekLabel = 'Week of ' + formatDate(weekData.monday);
+                const prefix = clientNameForDesc ? weekLabel + ' – ' + clientNameForDesc : weekLabel;
+
+                if (otHours > 0 && normalHours > 0) {
+                    const avgNormalRate = normalAmount / normalHours;
+                    const avgOTRate = otAmount / otHours;
+                    lineItems.push({ description: prefix + ' – Normal', hours: normalHours, rate: avgNormalRate, amount: normalAmount });
+                    lineItems.push({ description: prefix + ' – Overtime', hours: otHours, rate: avgOTRate, amount: otAmount });
+                } else if (otHours > 0) {
+                    const avgOTRate = otAmount / otHours;
+                    lineItems.push({ description: prefix + ' – Overtime', hours: otHours, rate: avgOTRate, amount: otAmount });
+                } else {
+                    const avgRate = normalHours > 0 ? normalAmount / normalHours : 0;
+                    lineItems.push({ description: prefix, hours: normalHours, rate: avgRate, amount: normalAmount });
+                }
             });
 
             switchTab('tab-invoice');
@@ -1897,6 +2040,7 @@
                             ${c.abn ? `<span class="badge">ABN ${formatABN(c.abn)}</span>` : ''}
                             <div style="font-size:12px;color:var(--text-muted);">${escapeHtml(c.address || 'No address')}</div>
                             <div style="font-size:12px;color:var(--text-muted);">Next Invoice #: ${c.nextInvoiceNumber ? 'INV-' + String(c.nextInvoiceNumber).padStart(4,'0') : 'INV-0001'}</div>
+                            ${c.chargeOvertime ? `<div style="font-size:12px;color:var(--accent);">⚡ OT: over ${c.overtimeAfter}hrs @ $${parseFloat(c.overtimeRate).toFixed(2)}${c.saturdaysAtOT ? ' · Sat @ OT' : ''}</div>` : ''}
                         </div>
                         <div>
                             <button class="btn btn-secondary btn-sm edit-client" data-id="${c.id}">✎</button>
@@ -2021,7 +2165,7 @@
         });
 
         // ============================================================
-        // CRUD: CLIENT
+        // CRUD: CLIENT (with OT)
         // ============================================================
         function editClient(id) {
             const c = getClient(id);
@@ -2031,6 +2175,11 @@
             document.getElementById('clientAbn').value = c.abn ? formatABN(c.abn) : '';
             document.getElementById('clientAddress').value = c.address || '';
             document.getElementById('clientEmail').value = c.email || '';
+            document.getElementById('clientChargeOT').checked = !!c.chargeOvertime;
+            document.getElementById('clientOTRate').value = c.overtimeRate || '';
+            document.getElementById('clientOTAfter').value = c.overtimeAfter || 8;
+            document.getElementById('clientSaturdayOT').checked = !!c.saturdaysAtOT;
+            document.getElementById('otFields').style.display = c.chargeOvertime ? 'block' : 'none';
             document.getElementById('cancelClientBtn').style.display = 'inline-block';
             document.getElementById('resetInvoiceCounterBtn').style.display = 'inline-block';
             document.getElementById('saveClientBtn').textContent = '✎ Update Client';
@@ -2045,6 +2194,10 @@
             renderAll();
         }
 
+        document.getElementById('clientChargeOT').addEventListener('change', function() {
+            document.getElementById('otFields').style.display = this.checked ? 'block' : 'none';
+        });
+
         document.getElementById('saveClientBtn').addEventListener('click', function() {
             const editId = document.getElementById('editClientId').value;
             const name = document.getElementById('clientName').value.trim();
@@ -2052,11 +2205,28 @@
             const rawAbn = document.getElementById('clientAbn').value.trim();
             const clean = rawAbn ? cleanABN(rawAbn) : '';
             if (clean && clean.length !== 11) { showStatus('ABN must be 11 digits (optional).', 'error'); return; }
+
+            const chargeOvertime = document.getElementById('clientChargeOT').checked;
+            let overtimeRate = 0, overtimeAfter = 8, saturdaysAtOT = false;
+
+            if (chargeOvertime) {
+                overtimeRate = parseFloat(document.getElementById('clientOTRate').value);
+                overtimeAfter = parseFloat(document.getElementById('clientOTAfter').value);
+                saturdaysAtOT = document.getElementById('clientSaturdayOT').checked;
+                if (isNaN(overtimeRate) || overtimeRate <= 0) {
+                    showStatus('Please enter a valid overtime rate.', 'error'); return;
+                }
+                if (isNaN(overtimeAfter) || overtimeAfter <= 0) {
+                    showStatus('Please enter a valid overtime threshold (hrs).', 'error'); return;
+                }
+            }
+
             const payload = {
                 name,
                 abn: clean || '',
                 address: document.getElementById('clientAddress').value.trim(),
-                email: document.getElementById('clientEmail').value.trim()
+                email: document.getElementById('clientEmail').value.trim(),
+                chargeOvertime, overtimeRate, overtimeAfter, saturdaysAtOT
             };
             if (editId) {
                 const existing = getClient(editId);
@@ -2098,6 +2268,11 @@
             document.getElementById('clientAbn').value = '';
             document.getElementById('clientAddress').value = '';
             document.getElementById('clientEmail').value = '';
+            document.getElementById('clientChargeOT').checked = false;
+            document.getElementById('clientOTRate').value = '';
+            document.getElementById('clientOTAfter').value = 8;
+            document.getElementById('clientSaturdayOT').checked = false;
+            document.getElementById('otFields').style.display = 'none';
             document.getElementById('cancelClientBtn').style.display = 'none';
             document.getElementById('resetInvoiceCounterBtn').style.display = 'none';
             document.getElementById('saveClientBtn').textContent = '💾 Save Client';
@@ -2244,7 +2419,7 @@
         });
 
         // ============================================================
-        // BUILD INVOICE DATA – with custom invoice number support
+        // BUILD INVOICE DATA
         // ============================================================
         function buildInvoiceData(invoiceNumber) {
             const bizId = document.getElementById('invBusiness').value;
@@ -2260,21 +2435,17 @@
                 return null;
             }
 
-            // ---- CUSTOM INVOICE NUMBER LOGIC ----
             const customInput = document.getElementById('customInvoiceNumber').value;
-            let finalNumber = invoiceNumber; // start with passed-in number (for preview/editing)
+            let finalNumber = invoiceNumber;
 
             if (invoiceNumber && !invoiceNumber.startsWith('PREVIEW-')) {
-                // If we have a real number passed in (editing), keep it
                 finalNumber = invoiceNumber;
             } else if (customInput && customInput.trim() !== '') {
-                // User entered a custom number
                 const parsed = parseCustomInvoiceNumber(customInput);
                 if (parsed === null) {
                     showStatus('Invalid invoice number. Please enter a number (e.g., 5) or leave blank.', 'error');
                     return null;
                 }
-                // Check if this number already exists for this client and business
                 const formatted = formatInvoiceNumber(parsed);
                 if (appData.invoices.some(inv =>
                         inv.invoiceNumber === formatted &&
@@ -2285,19 +2456,15 @@
                     return null;
                 }
                 finalNumber = formatted;
-                // Also update the client's counter to parsed + 1 if parsed is >= current
                 const currentCounter = client.nextInvoiceNumber || 1;
                 if (parsed >= currentCounter) {
                     client.nextInvoiceNumber = parsed + 1;
                     saveData(appData);
                 }
             } else {
-                // No custom number – use the preview or auto number
                 if (invoiceNumber && invoiceNumber.startsWith('PREVIEW-')) {
-                    // Preview – keep the preview number
                     finalNumber = invoiceNumber;
                 } else {
-                    // Auto – generate next
                     const nextNum = getNextInvoiceNumberForClient(clientId);
                     if (!nextNum) {
                         showStatus('Could not generate invoice number.', 'error');
@@ -2458,8 +2625,6 @@
                     const peeked = peekNextInvoiceNumber(clientId);
                     if (peeked) previewNumber = peeked + '-preview';
                 }
-                // For preview, we pass the preview number and let buildInvoiceData handle custom numbers
-                // But if the user entered a custom number, we want to show it in the preview
                 const customInput = document.getElementById('customInvoiceNumber').value;
                 if (customInput && customInput.trim() !== '') {
                     const parsed = parseCustomInvoiceNumber(customInput);
@@ -2479,7 +2644,7 @@
         });
 
         // ============================================================
-        // PDF / PNG / SHARE (unchanged)
+        // PDF / PNG / SHARE
         // ============================================================
         function captureInvoiceLight(previewElement) {
             const body = document.body;
@@ -2644,7 +2809,7 @@
         document.getElementById('generatePngBtn').addEventListener('click', () => generateFromPreview('png'));
 
         // ============================================================
-        // SAVE INVOICE – with custom number support
+        // SAVE INVOICE
         // ============================================================
         document.getElementById('saveInvoiceBtn').addEventListener('click', function() {
             const editingId = document.getElementById('editingInvoiceId').value;
@@ -2655,16 +2820,12 @@
                 if (existing) { originalNumber = existing.invoiceNumber;
                     isEditing = true; }
             }
-            // For editing, pass the original number so it stays the same
             const data = buildInvoiceData(originalNumber || null);
             if (!data) return;
-            // If we're editing, ensure we use the original number (the user can't change it via custom field during edit)
             if (isEditing && originalNumber) {
                 data.invoiceNumber = originalNumber;
             }
-            // If it's a new invoice and still a preview number (and no custom number was set), consume a real one
             if (!isEditing && (data.invoiceNumber.includes('PREVIEW-') || data.invoiceNumber.includes('-preview'))) {
-                // The buildInvoiceData function already handled custom numbers, so this should only happen if user left it blank
                 const clientId = data.clientId || data.client.id;
                 const realNumber = getNextInvoiceNumberForClient(clientId);
                 if (!realNumber) {
@@ -2727,7 +2888,7 @@
         });
 
         // ============================================================
-        // HISTORY & REPORTS (unchanged)
+        // HISTORY & REPORTS
         // ============================================================
         function renderHistory() {
             const container = document.getElementById('historyList');
@@ -3173,7 +3334,13 @@
                     }
                     if (!confirm('This will replace ALL current data. Continue?')) return;
                     appData = imported;
-                    appData.clients.forEach(c => { if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1; });
+                    appData.clients.forEach(c => {
+                        if (c.nextInvoiceNumber === undefined) c.nextInvoiceNumber = 1;
+                        if (c.chargeOvertime === undefined) c.chargeOvertime = false;
+                        if (c.overtimeRate === undefined) c.overtimeRate = 0;
+                        if (c.overtimeAfter === undefined) c.overtimeAfter = 8;
+                        if (c.saturdaysAtOT === undefined) c.saturdaysAtOT = false;
+                    });
                     appData.businesses.forEach(b => { if (b.logo === undefined) b.logo = null; });
                     saveData(appData);
                     renderAll();
@@ -3216,6 +3383,7 @@
                 renderTimesheet();
                 populateTimesheetClients();
                 populateDayDropdown();
+                updateOTHint();
             }
             if (tabId === 'tab-invoice') { populateDropdowns(); }
         }
@@ -3242,8 +3410,7 @@
         }
 
         renderAll();
-        console.log('🧾 Invoice App – COMPLETE with custom invoice number!');
-        console.log('✅ Enter any number in the "Invoice Number (optional)" field to override auto-numbering.');
+        console.log('🧾 Invoice App – COMPLETE with custom invoice number + overtime!');
     </script>
 </body>
 </html>
